@@ -4,13 +4,13 @@ async function parse(res) { let j = {}; try { j = await res.json(); } catch { /*
 const post = async (url, body) => parse(await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) }));
 const get = async (url) => parse(await fetch(url));
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-let DATA = null, BUSY = false;
+let DATA = null, BUSY = false, AI = false;
 
 const FIELDS = [['title', '설명 (제목)'], ['name', '프로젝트명'], ['period', '기간'], ['people', '인원'], ['env', '언어 및 환경'], ['role', '개발 담당'], ['result', '프로젝트 성과'], ['note', '비고']];
 
 function setBusy(b, text) { BUSY = b; $('#make').disabled = b; $('#download').disabled = b; if (text !== undefined) $('#status').textContent = text; }
 async function load() {
-  DATA = await get('/api/projects');
+  DATA = await get('/api/projects'); get('/api/ai').then(r => { AI = r.available; }).catch(() => {});
   $('#stage').innerHTML = renderPages(DATA, true);
   layoutShots($('#stage'));
   if (!BUSY) $('#status').textContent = DATA.collectedAt ? `마지막 불러오기 ${new Date(DATA.collectedAt).toLocaleString('ko-KR')} · 프로젝트 ${DATA.projects.length}개` : '';
@@ -82,7 +82,7 @@ function openEdit(key) {
     <label><input type="radio" name="sec" value="team" ${p.section === 'team' ? 'checked' : ''}>팀 / 공개 프로젝트</label>
     <label><input type="radio" name="sec" value="solo" ${p.section === 'solo' ? 'checked' : ''}>개인 프로젝트</label></div></div>` + FIELDS.map(([f, label]) => {
     const v = Array.isArray(p[f]) ? p[f].join('\n') : (p[f] || '');
-    return `<label><span>${label}</span><textarea data-f="${f}" rows="1">${esc(v)}</textarea></label>`;
+    return `<label><span>${label}</span><textarea data-f="${f}" rows="1">${esc(v)}</textarea>${f === 'title' && AI ? '<button type="button" class="aibtn" data-ai>AI로 쓰기</button>' : ''}</label>`;
   }).join('');
   // 스크린샷 고르기: 누른 순서대로 최대 3장
   SEL = [...p.images];
@@ -106,6 +106,13 @@ $('#editForm').addEventListener('submit', async (e) => {
   if (Object.keys(patch).length) { await post('/api/patch', { key, patch }); await load(); }
 });
 
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-ai]'); if (!b) return;
+  const ta = b.parentElement.querySelector('textarea'), was = b.textContent; b.disabled = true; b.textContent = '쓰는 중…';
+  try { const r = await post('/api/retitle', { key: $('#edit').dataset.key }); ta.value = r.title; grow(ta); b.textContent = '다시 쓰기'; }
+  catch (err) { b.textContent = was; alert(err.message); }
+  b.disabled = false;
+});
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-edit]'); if (b) openEdit(b.dataset.edit); });
 $('#make').onclick = make;
 $('#download').onclick = download;

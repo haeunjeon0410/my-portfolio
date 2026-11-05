@@ -90,3 +90,7 @@ body.print .tools { display: none !important; }
 #edit .radios > span { font-size: 12.5px; color: var(--sub); }
 #edit .radios label { display: inline-flex; align-items: center; gap: 6px; margin-right: 22px; font-size: 14px; cursor: pointer; }
 #edit .radios input { width: 16px; height: 16px; margin: 0; accent-color: #111; }
+
+#edit .aibtn { grid-column: 2; justify-self: start; margin-top: -4px; padding: 4px 10px; font-size: 12px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--sub); cursor: pointer; }
+#edit .aibtn:hover { color: var(--ink); border-color: #c9ced6; }
+#edit .aibtn:disabled { opacity: .6; cursor: default; }

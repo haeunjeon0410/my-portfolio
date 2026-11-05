@@ -6,7 +6,8 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { collect, IMG_DIR } = require('./lib/collect');
-const { build, patchProject, includeProject, hideProject, DATA_DIR } = require('./lib/build');
+const { build, patchProject, includeProject, hideProject, sourceRepo, DATA_DIR } = require('./lib/build');
+const ai = require('./lib/ai');
 
 const PORT = Number(process.env.PORT) || 4173;
 const ROOT = __dirname;
@@ -79,7 +80,23 @@ const server = http.createServer(async (req, res) => {
       return json(res, { ok: true });
     }
     if (p === '/api/patch' && post) { const b = await readBody(req); patchProject(b.key, b.patch); return json(res, { ok: true }); }
-    if (p === '/api/include' && post) { const b = await readBody(req); includeProject(b.key); return json(res, { ok: true }); }
+    if (p === '/api/include' && post) {
+      const b = await readBody(req); includeProject(b.key);
+      const proj = build().projects.find(x => x.key === String(b.key).toLowerCase());
+      let aiTitle = null;
+      if (proj && ai.available()) {                                    // 새로 넣은 카드의 제목 초안만 AI가 쓴다 (실패하면 README에서 뽑은 값 그대로)
+        const r = sourceRepo(b.key); aiTitle = r && await ai.suggestTitle(r);
+        if (aiTitle) patchProject(b.key, { title: aiTitle });
+      }
+      return json(res, { ok: true, aiTitle });
+    }
+    if (p === '/api/retitle' && post) {                               // 수정 창의 "AI로 제목 쓰기": 제안만 돌려주고 저장은 사용자가 한다
+      const b = await readBody(req);
+      if (!ai.available()) return fail(res, 400, 'AI 키가 설정되지 않았습니다.');
+      const r = sourceRepo(b.key); const title = r && await ai.suggestTitle(r);
+      return title ? json(res, { ok: true, title }) : fail(res, 422, ai.error() || '제목을 만들지 못했습니다.');
+    }
+    if (p === '/api/ai') return json(res, { available: ai.available() });
     if (p === '/api/hide' && post) { const b = await readBody(req); hideProject(b.key); return json(res, { ok: true }); }
     if (p === '/api/make' && post) { await makePdf(); return json(res, { ok: true, ...pdfInfo() }); }
     if (p === '/api/download') {
