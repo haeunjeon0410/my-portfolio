@@ -2,7 +2,11 @@
 
 GitHub 저장소 기반 카드형 A4 PDF 포트폴리오 생성 앱. 로컬 실행 전용.
 
-![포트폴리오 1페이지](docs/screenshots/preview.png)
+![앱 화면: 프로젝트 카드를 한눈에 보고 업데이트·다운로드](docs/screenshots/app-main.png)
+
+![카드 수정: 구분, 설명, AI 제목 후보 3개 중 선택](docs/screenshots/app-edit.png)
+
+![출력 결과: PDF 1페이지](docs/screenshots/preview.png)
 
 ## 기능
 
