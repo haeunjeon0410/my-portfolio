@@ -19,6 +19,19 @@ GitHub 저장소 기반 카드형 A4 PDF 포트폴리오 생성 앱. 로컬 실�
 - 출력: 화면과 동일한 렌더링의 PDF
 - 선택 다운로드: 프로젝트를 골라 내려받기, 프리셋(팀·개인·백엔드·프론트엔드), 전체 선택·해제, 1인 개발은 프론트·백엔드 양쪽 포함
 
+## 기술 스택
+
+| 구분 | 사용 |
+|---|---|
+| 런타임 | Node.js 22+ (외부 패키지 없음, `npm install` 불필요) |
+| 서버 | Node 내장 `http` (127.0.0.1 전용) |
+| 화면 | HTML · CSS · JavaScript (프레임워크 없음), 화면과 PDF가 같은 렌더링 코드 공유 |
+| 데이터 수집 | GitHub REST · GraphQL API (`gh` 로그인 토큰 또는 `GITHUB_TOKEN`) |
+| PDF | 헤드리스 Chrome/Edge를 DevTools Protocol로 제어 (사진 로딩 완료 후 출력) |
+| AI(선택) | 학교 API Gateway(chat/completions), gpt-6-luna |
+| 저장 | 로컬 JSON 파일 (`data/`), 변경 시 자동 백업 |
+| 테스트 | Node 내장 `node:test` |
+
 ## 데이터
 
 | 경로 | 내용 |
@@ -33,12 +46,14 @@ GitHub 저장소 기반 카드형 A4 PDF 포트폴리오 생성 앱. 로컬 실�
 
 | 경로 | 역할 |
 |---|---|
-| `lib/collect.js`, `lib/github.js` | GitHub 수집 |
+| `server.js` | 로컬 서버, API, 요청 검사 |
+| `lib/collect.js`, `lib/github.js` | GitHub 수집 (변경분만, 재시도·시간 제한) |
 | `lib/judge.js` | 완성 판단, 팀 표·기간 추출 |
 | `lib/build.js` | 카드 목록 병합, 입력 검증, 백업 |
 | `lib/ai.js` | AI 제목 초안 (선택) |
 | `lib/pdf.js` | Chrome 제어 PDF 출력 |
-| `public/` | 화면·PDF 공용 렌더링 |
+| `public/` | 화면·PDF 공용 렌더링, 다운로드 선택 창 |
+| `tests/` | 판단 규칙, 입력 검증, 서버 보안, AI 응답 처리 |
 
 테스트: `npm test`
 
