@@ -61,3 +61,13 @@ test('설명에 안내 문구가 섞이지 않는다', () => {
   const f = autoFields(repo({ readme: '# 앱\n\n> 스크린샷은 예시입니다.\n\n실제 소개 문장입니다 여기에.' }), user);
   assert.ok(!f.title.includes('스크린샷'));
 });
+
+// ---------- 성과(수상) 자동 채움: "대상" 같은 흔한 단어를 성과로 오인하지 않는다 ----------
+test('성과: 대회와 상 이름이 함께 있는 줄만 수상으로 본다', () => {
+  const { autoFields } = require('../lib/judge');
+  const res = (s) => autoFields({ name: 'x', readme: s, description: '', contributors: [], langs: {}, deps: [], span: {}, images: [], pushedAt: '' }, { login: 'me' }).result;
+  assert.equal(res('2026 SW MVP 경진대회 최우수상 수상작'), '2026 SW MVP 경진대회 최우수상');
+  assert.equal(res('Kirothon 우수상 수상'), 'Kirothon 우수상 수상');
+  assert.equal(res('제5회 해커톤 대상(1등)'), '제5회 해커톤 대상(1등)');
+  for (const s of ['- 삭제 대상: 임시 파일, 캐시', '대상 사용자는 대학생입니다', '공모전 대상 도전 예정', '수상 이력 없음']) assert.equal(res(s), '', s);
+});
