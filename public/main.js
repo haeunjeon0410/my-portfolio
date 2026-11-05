@@ -18,15 +18,21 @@ async function load() {
 
 // ---------- 새 저장소: 한 번만 묻는다 (체크한 것은 넣고, 체크하지 않은 것은 빼고 다시 묻지 않음) ----------
 function askNew(list) {
-  return new Promise((done) => {
+  return new Promise((done, fail) => {
     const dlg = $('#confirm');
     $('#newList').innerHTML = list.map((c, i) => `<li><label><input type="checkbox" data-i="${i}" ${c.recommend ? 'checked' : ''}>
       <span class="thumb">${c.images[0] ? `<img src="${esc(c.images[0])}" alt="">` : ''}</span>
       <span class="txt"><b>${esc(c.repo)}</b><small>${c.private ? '비공개' : '공개'} · ${c.recommend ? '완성으로 보임' : '미완성으로 보임'}${c.warnings.length ? ' · 주의: ' + esc(c.warnings.join(', ')) : ''}</small></span></label></li>`).join('');
     dlg.addEventListener('close', async () => {
       // "확인"을 눌렀을 때만 결정한다. Esc 나 바깥 클릭으로 닫으면 아무것도 확정하지 않는다(다음 업데이트 때 다시 묻는다).
-      if (dlg.returnValue === 'ok') for (const [i, c] of list.entries()) await post(dlg.querySelector(`input[data-i="${i}"]`).checked ? '/api/include' : '/api/hide', { key: c.key });
-      done();
+      try {
+        if (dlg.returnValue === 'ok') {
+          const inc = list.filter((c, i) => dlg.querySelector(`input[data-i="${i}"]`).checked).length;
+          if (inc && AI) $('#status').textContent = `새 프로젝트 ${inc}개의 제목을 쓰는 중…`;     // 저장소마다 AI 호출이 있어 몇 초 걸린다
+          await Promise.all(list.map((c, i) => post(dlg.querySelector(`input[data-i="${i}"]`).checked ? '/api/include' : '/api/hide', { key: c.key })));     // 동시에 처리 (저장은 서버가 한 번에 하나씩)
+        }
+        done();
+      } catch (e) { fail(e); }       // 실패해도 화면이 "불러오는 중"에 멈추지 않게 오류로 알린다
     }, { once: true });
     dlg.returnValue = '';
     dlg.showModal();
