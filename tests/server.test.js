@@ -68,3 +68,9 @@ test('PDF 가 아직 없으면 다운로드는 404, 상태는 exists:false', asy
   assert.equal((await req('GET', '/api/download')).status, 404);
   assert.deepEqual(JSON.parse((await req('GET', '/api/state')).body), { exists: false });
 });
+test('PDF 만들기: 잘못된 선택 목록은 Chrome 을 띄우기 전에 거절한다', async () => {
+  for (const keys of ['all', 5, ['../x'], ['__proto__'], [], ['nobody/none']]) {      // 형식 오류, 선택 없음, 없는 카드
+    const r = await req('POST', '/api/make', { body: JSON.stringify({ keys }) }); assert.equal(r.status, 400, `${JSON.stringify(keys)} → ${r.status}`);
+  }
+  assert.equal((await req('POST', '/api/make', { body: JSON.stringify({ keys: Array(201).fill('a/b') }) })).status, 400);
+});

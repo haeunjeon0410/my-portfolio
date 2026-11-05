@@ -6,7 +6,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { collect, IMG_DIR } = require('./lib/collect');
-const { build, patchProject, includeProject, hideProject, sourceRepo, DATA_DIR } = require('./lib/build');
+const { build, patchProject, includeProject, hideProject, sourceRepo, checkKey, DATA_DIR } = require('./lib/build');
 const ai = require('./lib/ai');
 
 const PORT = Number(process.env.PORT) || 4173;
@@ -47,16 +47,27 @@ function serveFile(res, dir, rel) {                            // dir 밖으로 
 }
 
 // ---------- PDF: 동시에 두 번 만들지 않는다 ----------
-let pdfJob = null;
-function makePdf() {
-  if (!pdfJob) pdfJob = require('./lib/pdf').makePdf(`http://127.0.0.1:${PORT}/print.html`, PDF_FILE).finally(() => { pdfJob = null; });
-  return pdfJob;                                               // 이미 만드는 중이면 그 결과를 같이 기다린다
+let pdfChain = Promise.resolve();
+function makePdf(keys) {                                       // keys 가 있으면 그 카드만 담는다 (지원 분야별 PDF)
+  const url = `http://127.0.0.1:${PORT}/print.html` + (keys ? `?keys=${encodeURIComponent(keys.join(','))}` : '');
+  const run = () => require('./lib/pdf').makePdf(url, PDF_FILE);
+  const job = pdfChain.then(run, run);                         // 하나씩 차례로 만든다 (같은 파일에 동시에 쓰지 않도록)
+  pdfChain = job.catch(() => {});
+  return job;
 }
-function pdfInfo() {
+const pageCount = (list) => ['team', 'solo'].reduce((n, k) => n + Math.ceil(list.filter(p => p.section === k).length / 2), 0);
+function pdfInfo(list) {
   let st; try { st = fs.statSync(PDF_FILE); } catch { return { exists: false }; }
-  const d = build(), cards = d.projects.length;
-  const pages = ['team', 'solo'].reduce((n, k) => n + Math.ceil(d.projects.filter(p => p.section === k).length / 2), 0);
-  return { exists: true, cards, pages, at: st.mtime.toISOString() };
+  const l = list || build().projects;
+  return { exists: true, cards: l.length, pages: pageCount(l), at: st.mtime.toISOString() };
+}
+function pickKeys(raw) {                                       // 화면에서 온 카드 목록 검사: 있는 카드만, 최소 1개
+  if (raw === undefined) return null;
+  if (!Array.isArray(raw) || raw.length > 200) throw Object.assign(new Error('선택한 프로젝트가 올바르지 않습니다.'), { code: 'BAD_INPUT' });
+  const keys = raw.map(checkKey), all = build().projects;
+  const list = all.filter(p => keys.includes(p.key.toLowerCase()));
+  if (!list.length) throw Object.assign(new Error('내려받을 프로젝트를 한 개 이상 선택해 주세요.'), { code: 'BAD_INPUT' });
+  return { keys: list.map(p => p.key.toLowerCase()), list, full: list.length === all.length };
 }
 
 // ---------- 요청 검사 ----------
@@ -98,7 +109,11 @@ const server = http.createServer(async (req, res) => {
     }
     if (p === '/api/ai') return json(res, { available: ai.available() });
     if (p === '/api/hide' && post) { const b = await readBody(req); hideProject(b.key); return json(res, { ok: true }); }
-    if (p === '/api/make' && post) { await makePdf(); return json(res, { ok: true, ...pdfInfo() }); }
+    if (p === '/api/make' && post) {
+      const sel = pickKeys((await readBody(req)).keys);
+      await makePdf(sel && !sel.full ? sel.keys : null);       // 전부 고른 경우는 필터 없이 만든다
+      return json(res, { ok: true, ...pdfInfo(sel ? sel.list : null) });
+    }
     if (p === '/api/download') {
       let buf; try { buf = fs.readFileSync(PDF_FILE); } catch { return fail(res, 404, '아직 만든 PDF가 없습니다.'); }
       return send(res, 200, buf, 'application/pdf', { 'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent('포트폴리오.pdf')}` });
