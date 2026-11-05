@@ -13,11 +13,6 @@ GitHub 저장소 기반 카드형 A4 PDF 포트폴리오 생성 앱. 로컬 실�
 - 카드 수정: 구분(팀/개인), 설명, 성과, 사진 최대 3장
 - 출력: 화면과 동일한 렌더링의 PDF
 
-## 실행
-
-- 요구 사항: Node.js 22+, `gh auth login`(또는 `GITHUB_TOKEN`), Chrome/Edge
-- `npm start` 후 http://127.0.0.1:4173 (Windows: `포트폴리오 열기.vbs`)
-
 ## 데이터
 
 | 경로 | 내용 |
