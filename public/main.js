@@ -109,9 +109,18 @@ $('#editForm').addEventListener('submit', async (e) => {
 document.addEventListener('click', async (e) => {
   const b = e.target.closest('[data-ai]'); if (!b) return;
   const ta = b.parentElement.querySelector('textarea'), was = b.textContent; b.disabled = true; b.textContent = '쓰는 중…';
-  try { const r = await post('/api/retitle', { key: $('#edit').dataset.key }); ta.value = r.title; grow(ta); b.textContent = '다시 쓰기'; }
-  catch (err) { b.textContent = was; alert(err.message); }
+  try {
+    const r = await post('/api/retitle', { key: $('#edit').dataset.key });
+    let box = b.parentElement.querySelector('.cands'); if (!box) { box = document.createElement('div'); box.className = 'cands'; b.parentElement.appendChild(box); }
+    box.innerHTML = r.titles.map(t => `<button type="button" class="cand" data-t="${esc(t.title)}"><em>${esc(t.style)}</em>${esc(t.title)}</button>`).join('');
+    b.textContent = '다시 쓰기';
+  } catch (err) { b.textContent = was; alert(err.message); }
   b.disabled = false;
+});
+document.addEventListener('click', (e) => {                       // 후보를 누르면 설명 칸에 채운다 (저장은 따로)
+  const c = e.target.closest('#edit .cand'); if (!c) return;
+  const ta = c.closest('label').querySelector('textarea'); ta.value = c.dataset.t; grow(ta);
+  c.parentElement.querySelectorAll('.cand').forEach(x => x.classList.toggle('on', x === c));
 });
 document.addEventListener('click', (e) => { const b = e.target.closest('[data-edit]'); if (b) openEdit(b.dataset.edit); });
 $('#make').onclick = make;

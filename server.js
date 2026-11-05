@@ -93,8 +93,8 @@ const server = http.createServer(async (req, res) => {
     if (p === '/api/retitle' && post) {                               // 수정 창의 "AI로 제목 쓰기": 제안만 돌려주고 저장은 사용자가 한다
       const b = await readBody(req);
       if (!ai.available()) return fail(res, 400, 'AI 키가 설정되지 않았습니다.');
-      const r = sourceRepo(b.key); const title = r && await ai.suggestTitle(r);
-      return title ? json(res, { ok: true, title }) : fail(res, 422, ai.error() || '제목을 만들지 못했습니다.');
+      const r = sourceRepo(b.key); const titles = r ? await ai.suggestTitles(r) : [];
+      return titles.length ? json(res, { ok: true, titles }) : fail(res, 422, ai.error() || '제목을 만들지 못했습니다.');
     }
     if (p === '/api/ai') return json(res, { available: ai.available() });
     if (p === '/api/hide' && post) { const b = await readBody(req); hideProject(b.key); return json(res, { ok: true }); }
