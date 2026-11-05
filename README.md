@@ -1,4 +1,4 @@
-# portfolio-cards
+# MY PORTFOLIO
 
 GitHub 저장소 기반 카드형 A4 PDF 포트폴리오 생성 앱. 로컬 실행 전용.
 

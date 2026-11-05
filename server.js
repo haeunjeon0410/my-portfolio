@@ -96,5 +96,5 @@ server.on('error', (e) => {
   if (e.code === 'EADDRINUSE') { console.log(`이미 실행 중입니다. 브라우저에서 http://127.0.0.1:${PORT} 를 열어 주세요.`); process.exit(0); }
   throw e;
 });
-if (require.main === module) server.listen(PORT, '127.0.0.1', () => console.log(`포트폴리오 카드: http://127.0.0.1:${PORT}  (끄려면 이 창을 닫거나 Ctrl+C)`));
+if (require.main === module) server.listen(PORT, '127.0.0.1', () => console.log(`MY PORTFOLIO: http://127.0.0.1:${PORT}  (끄려면 이 창을 닫거나 Ctrl+C)`));
 module.exports = server;
