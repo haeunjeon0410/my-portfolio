@@ -23,7 +23,7 @@ test('근거(README·설명)가 거의 없으면 호출하지 않는다', async 
 test('응답에서 제목 한 줄만 꺼내고 따옴표·마침표를 지운다', async () => {
   process.env.SCHOOL_GATEWAY_API_KEY = 'test-key';
   const origFetch = global.fetch;
-  global.fetch = async () => ({ ok: true, json: async () => ({ content: [{ type: 'thinking' }, { type: 'text', text: '"강의자료를 바꿔 주는 확장."\n설명' }] }) });
+  global.fetch = async () => ({ ok: true, json: async () => ({ choices: [{ finish_reason: 'stop', message: { content: '"강의자료를 바꿔 주는 확장."\n설명' } }] }) });
   try { assert.equal(await ai.suggestTitle({ name: 'x', readme: 'a'.repeat(100), langs: {}, deps: [] }), '강의자료를 바꿔 주는 확장'); }
   finally { global.fetch = origFetch; delete process.env.SCHOOL_GATEWAY_API_KEY; }
 });
