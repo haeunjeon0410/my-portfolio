@@ -60,7 +60,6 @@ async function make() {
 // ---------- 다운로드: 지원 분야에 맞게 골라서 ----------
 const isSolo = (p) => /^1인/.test(p.people);
 const PRESETS = [                                                   // 누르면 해당하는 카드만 체크된다. 이후 하나씩 고칠 수 있다.
-  ['전체', () => true],
   ['팀 프로젝트', (p) => p.section === 'team'],
   ['개인 프로젝트', (p) => p.section === 'solo'],
   ['백엔드', (p) => isSolo(p) || /백엔드/.test(p.role)],
@@ -68,7 +67,7 @@ const PRESETS = [                                                   // 누르면
 ];
 function dlCount() {
   const n = document.querySelectorAll('#dlList input:checked').length;
-  $('#dlCount').textContent = `${n}개 선택`; $('#dlOk').disabled = n === 0;
+  $('#dlOk').textContent = n ? `PDF 만들기 (${n})` : 'PDF 만들기'; $('#dlOk').disabled = n === 0;
   document.querySelectorAll('#dlPresets button').forEach((b) => {            // 지금 체크 상태와 정확히 같은 묶음을 표시
     const f = PRESETS[b.dataset.i][1], same = DATA.projects.every((p, i) => document.querySelector(`#dlList input[data-i="${i}"]`).checked === !!f(p));
     b.classList.toggle('on', same);
@@ -78,9 +77,7 @@ function chooseDownload() {
   return new Promise((done) => {
     const dlg = $('#dl'), list = DATA.projects;
     $('#dlPresets').innerHTML = PRESETS.map(([name], i) => `<button type="button" class="chip" data-i="${i}">${name}</button>`).join('');
-    $('#dlList').innerHTML = list.map((p, i) => `<li><label><input type="checkbox" data-i="${i}" checked>
-      <span class="txt"><b>${esc(p.name)}</b><small>${esc(p.title)}</small></span>
-      <span class="tag">${p.section === 'team' ? '팀' : '개인'}${isSolo(p) ? ' · 1인' : (p.role ? ' · ' + esc(p.role) : '')}</span></label></li>`).join('');
+    $('#dlList').innerHTML = list.map((p, i) => `<li><label title="${p.section === 'team' ? '팀' : '개인'}${isSolo(p) ? ' · 1인 개발' : (p.role ? ' · ' + esc(p.role) : '')}"><input type="checkbox" data-i="${i}" checked><b>${esc(p.name)}</b></label></li>`).join('');
     dlg.addEventListener('close', () => {
       done(dlg.returnValue === 'ok' ? [...dlg.querySelectorAll('#dlList input')].filter(c => c.checked).map(c => list[c.dataset.i].key) : null);
     }, { once: true });
@@ -91,6 +88,11 @@ document.addEventListener('click', (e) => {
   const b = e.target.closest('#dlPresets button'); if (!b) return;
   const f = PRESETS[b.dataset.i][1];
   DATA.projects.forEach((p, i) => { document.querySelector(`#dlList input[data-i="${i}"]`).checked = !!f(p); });
+  dlCount();
+});
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('#dl [data-all]'); if (!b) return;
+  document.querySelectorAll('#dlList input').forEach((c) => { c.checked = b.dataset.all === '1'; });
   dlCount();
 });
 document.addEventListener('change', (e) => { if (e.target.matches('#dlList input')) dlCount(); });
