@@ -1,0 +1,10 @@
+# 내 포트폴리오 내용 (비공개 저장소 프로젝트가 들어 있을 수 있음)
+data/overrides.json
+data/images/
+data/backups/
+data/portfolio.pdf
+data/config.json
+.cache/
+*.pdf
+node_modules/
+*.log

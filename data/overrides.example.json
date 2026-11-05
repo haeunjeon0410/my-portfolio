@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "your-id/your-repo": {
+      "repos": ["your-id/your-repo"],
+      "order": 1,
+      "section": "team",
+      "name": "프로젝트 이름",
+      "title": "한 줄 설명",
+      "period": "2026.10 (약 3주)",
+      "people": "4명 (프론트 2 · 백엔드 2)",
+      "role": "백엔드",
+      "env": "TypeScript, NestJS, Docker",
+      "result": "수상·성과가 있으면 한 줄",
+      "note": ""
+    }
+  },
+  "hidden": ["your-id/repo-to-skip"]
+}
