@@ -16,7 +16,7 @@ const IMAGES_DIR = path.join(DATA_DIR, 'images');
 const PDF_FILE = path.join(DATA_DIR, 'portfolio.pdf');
 const MAX_BODY = 256 * 1024;                                  // 이 앱의 요청 본문은 아주 작다. 큰 본문은 거절한다.
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8',
-  '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.pdf': 'application/pdf' };
+  '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.pdf': 'application/pdf' };
 const job = { running: false, log: [], error: '' };
 
 // ---------- 응답 도우미 ----------

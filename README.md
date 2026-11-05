@@ -26,6 +26,7 @@ GitHub 저장소 기반 카드형 A4 PDF 포트폴리오 생성 앱. 로컬 실�
 | 런타임 | Node.js 22+ (외부 패키지 없음, `npm install` 불필요) |
 | 서버 | Node 내장 `http` (127.0.0.1 전용) |
 | 화면 | HTML · CSS · JavaScript (프레임워크 없음), 화면과 PDF가 같은 렌더링 코드 공유 |
+| 글꼴 | Pretendard 가변 글꼴 포함 (`public/fonts/`, SIL OFL 1.1) |
 | 데이터 수집 | GitHub REST · GraphQL API (`gh` 로그인 토큰 또는 `GITHUB_TOKEN`) |
 | PDF | 헤드리스 Chrome/Edge를 DevTools Protocol로 제어 (사진 로딩 완료 후 출력) |
 | AI(선택) | 학교 API Gateway(chat/completions), gpt-6-luna |

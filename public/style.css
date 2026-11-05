@@ -1,5 +1,6 @@
 :root { --ink: #111; --sub: #6b7280; --faint: #9ca3af; --line: #e5e7eb; --bg: #f4f4f2; --panel: #f5f6f8; --label: #7b8494; }
 * { box-sizing: border-box; }
+@font-face { font-family: 'Pretendard'; src: url('/fonts/PretendardVariable.woff2') format('woff2-variations'); font-weight: 45 920; font-style: normal; font-display: block; }     /* 앱에 포함한 글꼴(OFL). 설치 여부와 상관없이 같은 글꼴로 나온다 */
 body { margin: 0; font-family: 'Pretendard', 'Malgun Gothic', system-ui, sans-serif; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; }
 button { font: inherit; color: inherit; }
 

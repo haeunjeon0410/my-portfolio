@@ -6,5 +6,6 @@
   if (keys) { const want = new Set(keys.split(',').map(k => k.toLowerCase())); d.projects = d.projects.filter(p => want.has(p.key.toLowerCase())); }
   document.getElementById('stage').innerHTML = renderPages(d, false);
   await layoutShots();
+  await document.fonts.load('16px Pretendard'); await document.fonts.load('700 16px Pretendard'); await document.fonts.ready;     // 글꼴까지 준비된 뒤에 찍는다
   document.title = 'ready';
 })();
