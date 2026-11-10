@@ -11,7 +11,7 @@ const FIELDS = [['title', '설명 (제목)'], ['name', '프로젝트명'], ['per
 function setBusy(b, text) { BUSY = b; $('#make').disabled = b; $('#download').disabled = b; if (text !== undefined) $('#status').textContent = text; }
 async function load() {
   DATA = await get('/api/projects'); get('/api/ai').then(r => { AI = r.available; }).catch(() => {});
-  $('#hiddenBtn').hidden = !DATA.hiddenCount; $('#hiddenBtn').textContent = `뺀 저장소 ${DATA.hiddenCount}`;
+  $('#hiddenBtn').hidden = !DATA.hiddenCount; $('#hiddenBtn').title = $('#hiddenBtn').ariaLabel = `뺀 저장소 ${DATA.hiddenCount}개 (눌러서 되살리기)`;
   $('#stage').innerHTML = renderPages(DATA, true);
   layoutShots($('#stage'));
   if (!BUSY) $('#status').textContent = DATA.collectedAt ? `마지막 불러오기 ${new Date(DATA.collectedAt).toLocaleString('ko-KR')} · 프로젝트 ${DATA.projects.length}개` : '';

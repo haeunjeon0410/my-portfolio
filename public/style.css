@@ -117,9 +117,9 @@ body.print .tools { display: none !important; }
 #dl .link { padding: 0; border: 0; background: none; font: inherit; font-size: 13px; color: var(--sub); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 #dl .link:hover { color: var(--ink); }
 
-.textbtn { padding: 0; border: 0; background: none; font: inherit; font-size: 13px; color: var(--faint); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
-.textbtn:hover { color: var(--ink); }
-.textbtn[hidden] { display: none; }
+.iconbtn { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 36px; height: 36px; padding: 0; border: 1px solid #d4d4d8; border-radius: 6px; background: #fff; color: var(--sub); cursor: pointer; }
+.iconbtn:hover { border-color: #a1a1aa; color: var(--ink); }
+.iconbtn[hidden] { display: none; }
 #hidList { list-style: none; margin: 0; padding: 0; max-height: 52vh; overflow: auto; border-top: 1px solid var(--line); }
 #hidList li { border-bottom: 1px solid var(--line); }
 #hidList li.none { padding: 18px 2px; font-size: 13px; color: var(--sub); }

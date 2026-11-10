@@ -11,7 +11,7 @@
 <header class="bar">
   <h1>포트폴리오</h1>
   <span class="status" id="status"></span>
-  <button class="textbtn" id="hiddenBtn" hidden></button>
+  <button class="iconbtn" id="hiddenBtn" type="button" hidden><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="4.5" rx="1"/><path d="M5 8.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5"/><path d="M10 13h4"/></svg></button>
   <button class="btn" id="make">업데이트</button>
   <button class="btn primary" id="download">다운로드</button>
 </header>
@@ -29,7 +29,7 @@
 <dialog id="hid">
   <form method="dialog">
     <h2>뺀 저장소</h2>
-    <p class="hint">미완성이어서 뺀 저장소를 다시 확인 목록으로 되돌립니다. 완성된 것만 골라 되살리세요.</p>
+    <p class="hint">미완성이어서 뺀 저장소를 다시 확인 목록으로 되돌립니다.</p>
     <ul id="hidList"></ul>
     <div class="foot"><button class="btn" value="cancel">취소</button><button class="btn primary" value="ok" id="hidOk">다시 확인하기</button></div>
   </form>
