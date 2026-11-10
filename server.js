@@ -5,8 +5,8 @@ if (Number(process.versions.node.split('.')[0]) < 22) {
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { collect, IMG_DIR } = require('./lib/collect');
-const { build, patchProject, includeProject, hideProject, sourceRepo, checkKey, DATA_DIR } = require('./lib/build');
+const { collect, inspectRepos, IMG_DIR } = require('./lib/collect');
+const { build, patchProject, includeProject, hideProject, hiddenList, restoreProjects, sourceRepo, checkKey, DATA_DIR } = require('./lib/build');
 const ai = require('./lib/ai');
 
 const PORT = Number(process.env.PORT) || 4173;
@@ -18,6 +18,7 @@ const MAX_BODY = 256 * 1024;                                  // 이 앱의 요�
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8',
   '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.pdf': 'application/pdf' };
 const job = { running: false, log: [], error: '' };
+const liveCache = new Map(), LIVE_TTL = 10 * 60 * 1000;      // 뺀 저장소의 지금 상태 (되살리기 창용)
 
 // ---------- 응답 도우미 ----------
 const SECURITY = { 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', 'X-Frame-Options': 'DENY' };
@@ -108,6 +109,21 @@ const server = http.createServer(async (req, res) => {
       return titles.length ? json(res, { ok: true, titles }) : fail(res, 422, ai.error() || '제목을 만들지 못했습니다.');
     }
     if (p === '/api/ai') return json(res, { available: ai.available() });
+    if (p === '/api/hidden') {
+      const base = hiddenList(), now = Date.now();
+      const need = base.filter(x => !x.found && !(liveCache.get(x.key) && now - liveCache.get(x.key).at < LIVE_TTL)).map(x => x.repo);
+      if (need.length) {                                             // 업데이트가 건너뛴 저장소만 지금 GitHub에서 확인 (10분간 기억)
+        const got = await inspectRepos(need, build().user.login).catch(() => new Map());
+        need.forEach(n => liveCache.set(n.toLowerCase(), { at: now, repo: got.get(n.toLowerCase()) || null }));
+      }
+      const extra = new Map([...liveCache].filter(([, v]) => v.repo).map(([k, v]) => [k, v.repo]));
+      return json(res, hiddenList(extra));
+    }
+    if (p === '/api/restore' && post) {
+      const b = await readBody(req);
+      if (!Array.isArray(b.keys) || !b.keys.length || b.keys.length > 200) throw Object.assign(new Error('되살릴 저장소를 선택해 주세요.'), { code: 'BAD_INPUT' });
+      restoreProjects(b.keys); return json(res, { ok: true });
+    }
     if (p === '/api/hide' && post) { const b = await readBody(req); hideProject(b.key); return json(res, { ok: true }); }
     if (p === '/api/make' && post) {
       const sel = pickKeys((await readBody(req)).keys);

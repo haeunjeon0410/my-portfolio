@@ -11,6 +11,7 @@ const FIELDS = [['title', '설명 (제목)'], ['name', '프로젝트명'], ['per
 function setBusy(b, text) { BUSY = b; $('#make').disabled = b; $('#download').disabled = b; if (text !== undefined) $('#status').textContent = text; }
 async function load() {
   DATA = await get('/api/projects'); get('/api/ai').then(r => { AI = r.available; }).catch(() => {});
+  $('#hiddenBtn').hidden = !DATA.hiddenCount; $('#hiddenBtn').textContent = `뺀 저장소 ${DATA.hiddenCount}`;
   $('#stage').innerHTML = renderPages(DATA, true);
   layoutShots($('#stage'));
   if (!BUSY) $('#status').textContent = DATA.collectedAt ? `마지막 불러오기 ${new Date(DATA.collectedAt).toLocaleString('ko-KR')} · 프로젝트 ${DATA.projects.length}개` : '';
@@ -56,6 +57,30 @@ async function make() {
     $('#status').textContent = failedNote ? `일부 저장소 ${failedNote[1]}개를 확인하지 못했습니다. 잠시 뒤 다시 업데이트해 보세요.` : `준비되었습니다. 연필 아이콘으로 고친 뒤 다운로드하세요. (프로젝트 ${DATA.projects.length}개)`;
   } catch (e) { setBusy(false, '실패했습니다: ' + e.message); }
 }
+
+// ---------- 뺀 저장소 되살리기: 나중에 완성했을 때 다시 확인 목록으로 ----------
+function hidCount() { const n = document.querySelectorAll('#hidList input:checked').length; $('#hidOk').disabled = n === 0; $('#hidOk').textContent = n ? `다시 확인하기 (${n})` : '다시 확인하기'; }
+async function restoreHidden() {
+  if (BUSY) return;
+  let list; try { list = await get('/api/hidden'); } catch (e) { $('#status').textContent = '뺀 저장소를 불러오지 못했습니다: ' + e.message; return; }
+  const dlg = $('#hid');
+  $('#hidList').innerHTML = list.map((c, i) => `<li><label><input type="checkbox" data-i="${i}" ${c.found && !c.inCard ? '' : 'disabled'}>
+    <span class="txt"><b>${esc(c.repo)}</b><small>${c.inCard ? '이미 카드로 들어 있음' : c.found ? `${c.private ? '비공개' : '공개'} · ${c.recommend ? '지금은 완성으로 보임' : '아직 미완성으로 보임'}${c.pushedAt ? ' · 마지막 변경 ' + esc(String(c.pushedAt).slice(0, 10)) : ''}` : 'GitHub에서 찾을 수 없음'}</small></span></label></li>`).join('') || '<li class="none">뺀 저장소가 없습니다.</li>';
+  dlg.addEventListener('close', async () => {
+    if (dlg.returnValue !== 'ok') return;
+    const keys = [...dlg.querySelectorAll('#hidList input:checked')].flatMap(c => list[c.dataset.i].keys);
+    if (!keys.length) return;
+    setBusy(true, '되살리는 중…');
+    try {
+      await post('/api/restore', { keys }); await load();
+      if (DATA.pending.length) { $('#status').textContent = '되살린 저장소를 확인해 주세요.'; await askNew(DATA.pending); }
+      setBusy(false); await load();
+    } catch (e) { setBusy(false, '되살리지 못했습니다: ' + e.message); }
+  }, { once: true });
+  dlg.returnValue = ''; hidCount(); dlg.showModal();
+}
+$('#hiddenBtn').onclick = restoreHidden;
+document.addEventListener('change', (e) => { if (e.target.matches('#hidList input')) hidCount(); });
 
 // ---------- 다운로드: 지원 분야에 맞게 골라서 ----------
 const isSolo = (p) => /^1인/.test(p.people);

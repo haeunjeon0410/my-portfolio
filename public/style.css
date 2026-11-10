@@ -116,3 +116,15 @@ body.print .tools { display: none !important; }
 #dl .all { margin-right: auto; display: flex; gap: 14px; }
 #dl .link { padding: 0; border: 0; background: none; font: inherit; font-size: 13px; color: var(--sub); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 #dl .link:hover { color: var(--ink); }
+
+.textbtn { padding: 0; border: 0; background: none; font: inherit; font-size: 13px; color: var(--faint); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.textbtn:hover { color: var(--ink); }
+.textbtn[hidden] { display: none; }
+#hidList { list-style: none; margin: 0; padding: 0; max-height: 52vh; overflow: auto; border-top: 1px solid var(--line); }
+#hidList li { border-bottom: 1px solid var(--line); }
+#hidList li.none { padding: 18px 2px; font-size: 13px; color: var(--sub); }
+#hidList label { display: flex; gap: 14px; align-items: center; padding: 11px 2px; cursor: pointer; }
+#hidList input { width: 16px; height: 16px; accent-color: #111; }
+#hidList input:disabled + .txt { opacity: .5; }
+#hidList .txt b { display: block; font-size: 14px; font-weight: 600; word-break: break-all; }
+#hidList .txt small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--sub); }

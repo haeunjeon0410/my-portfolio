@@ -74,3 +74,8 @@ test('PDF 만들기: 잘못된 선택 목록은 Chrome 을 띄우기 전에 거�
   }
   assert.equal((await req('POST', '/api/make', { body: JSON.stringify({ keys: Array(201).fill('a/b') }) })).status, 400);
 });
+test('뺀 저장소 목록은 읽을 수 있고, 잘못된 되살리기 요청은 거절한다', async () => {
+  const r = await req('GET', '/api/hidden'); assert.equal(r.status, 200); assert.ok(Array.isArray(JSON.parse(r.body)));
+  for (const body of [{}, { keys: [] }, { keys: 'a/b' }, { keys: ['../x'] }, { keys: Array(201).fill('a/b') }])
+    assert.equal((await req('POST', '/api/restore', { body: JSON.stringify(body) })).status, 400, JSON.stringify(body).slice(0, 40));
+});

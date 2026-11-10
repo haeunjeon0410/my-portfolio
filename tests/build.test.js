@@ -87,3 +87,44 @@ test('거절된 요청은 저장된 데이터를 바꾸지 않는다', () => {
   assert.equal(fs.readFileSync(file, 'utf8'), before);
   assert.equal(({}).polluted, undefined);
 });
+
+// ---------- 뺀 저장소 되살리기 ----------
+const { hiddenList, restoreProjects } = require('../lib/build');
+test('뺀 저장소 목록에는 지금 상태(완성으로 보이는지)가 함께 나온다', () => {
+  writeOvr({ projects: {}, hidden: [] }); writeCollected(['delta']); hideProject('me/delta'); hideProject('me/gone');
+  const l = hiddenList(); assert.equal(l.length, 2);
+  const d = l.find(x => x.key === 'me/delta'), g = l.find(x => x.key === 'me/gone');
+  assert.equal(d.found, true); assert.equal(d.recommend, true); assert.equal(g.found, false);       // 수집에 없는 저장소는 되살릴 수 없다고 표시
+  assert.equal(l[0].key, 'me/delta');                                                                  // 찾은 것이 먼저
+  assert.equal(fresh().hiddenCount, 2);
+});
+test('되살리면 다시 "확인 필요"로 올라오고, 카드였던 것은 내용 그대로 돌아온다', () => {
+  writeOvr({ projects: {}, hidden: [] }); writeCollected(['eps', 'zeta']);
+  includeProject('me/zeta'); patchProject('me/zeta', { title: '내 제목' }); hideProject('me/zeta'); hideProject('me/eps');
+  assert.equal(fresh().projects.length, 0); assert.equal(build().pending.length, 0);                  // 빼면 다시 묻지 않는다
+  restoreProjects(['me/eps']);
+  let d = fresh(); assert.equal(d.pending.length, 1); assert.equal(d.pending[0].key, 'me/eps'); assert.equal(d.hiddenCount, 1);
+  restoreProjects(['ME/Zeta']);                                                                         // 대소문자 상관없이
+  d = fresh(); assert.equal(d.projects.length, 1); assert.equal(d.projects[0].title, '내 제목'); assert.equal(d.hiddenCount, 0);
+});
+test('되살리기 입력 검증: 이상한 이름은 거절하고 데이터를 바꾸지 않는다', () => {
+  const file = path.join(tmp, 'data', 'overrides.json'), before = fs.readFileSync(file, 'utf8');
+  for (const k of ['__proto__', '../x', '', null, 5]) rejects(() => restoreProjects([k]));
+  assert.equal(fs.readFileSync(file, 'utf8'), before);
+});
+test('뺀 저장소: 업데이트가 건너뛴 것은 지금 확인한 데이터로 완성 여부를 보여 준다', () => {
+  writeOvr({ projects: {}, hidden: [] }); writeCollected([]); hideProject('me/later');
+  assert.equal(hiddenList()[0].found, false);
+  const live = new Map([['me/later', mk('later')]]);
+  const h = hiddenList(live)[0]; assert.equal(h.found, true); assert.equal(h.recommend, true);
+});
+test('뺀 저장소: 같은 저장소(포크)는 한 줄로 합치고, 이미 카드인 것은 표시한다', () => {
+  writeOvr({ projects: { 'me/own': { repos: ['me/own'] } }, hidden: ['me/own', 'fork/orig', 'me/orig'] });
+  writeCollected(['own', 'orig']);
+  const live = new Map([['fork/orig', { ...mk('orig'), repo: 'me/orig' }]]);                         // 포크 'fork/orig' 는 원본 'me/orig' 로 확인된다
+  const l = hiddenList(live);
+  assert.equal(l.length, 2); const o = l.find(x => x.repo === 'me/orig');
+  assert.deepEqual(o.keys.sort(), ['fork/orig', 'me/orig']); assert.ok(!o.inCard);
+  assert.equal(l.find(x => x.repo === 'me/own').inCard, true);
+  restoreProjects(o.keys); assert.equal(fresh().hiddenCount, 1);                                      // 같은 저장소의 이름을 모두 되살린다
+});

@@ -11,6 +11,7 @@
 <header class="bar">
   <h1>포트폴리오</h1>
   <span class="status" id="status"></span>
+  <button class="textbtn" id="hiddenBtn" hidden></button>
   <button class="btn" id="make">업데이트</button>
   <button class="btn primary" id="download">다운로드</button>
 </header>
@@ -22,6 +23,15 @@
     <p class="hint">체크한 것은 포트폴리오에 넣고, 체크하지 않은 것은 뺍니다. 뺀 저장소는 다시 묻지 않습니다.</p>
     <ul id="newList"></ul>
     <div class="foot"><button class="btn primary" value="ok">확인</button></div>
+  </form>
+</dialog>
+
+<dialog id="hid">
+  <form method="dialog">
+    <h2>뺀 저장소</h2>
+    <p class="hint">미완성이어서 뺀 저장소를 다시 확인 목록으로 되돌립니다. 완성된 것만 골라 되살리세요.</p>
+    <ul id="hidList"></ul>
+    <div class="foot"><button class="btn" value="cancel">취소</button><button class="btn primary" value="ok" id="hidOk">다시 확인하기</button></div>
   </form>
 </dialog>
 
