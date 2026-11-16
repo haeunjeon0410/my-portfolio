@@ -19,10 +19,8 @@ const tech = (s) => `${esc(s.name)}${s.ver ? ` <i>${esc(s.ver)}</i>` : ''}`;
 // 카드 안에서는 3줄로 묶어 보여 준다: 프론트·화면 / 서버·DB / 인프라. 언어는 앞쪽 줄에 붙인다.
 function stackLines(stack, extraLangs = []) {
   stack = [...(stack || [])]; for (const l of [...extraLangs].reverse()) if (!stack.some(s => s.name === l)) stack.unshift({ name: l, cat: 'Language', ver: '' });     // 많이 쓴 언어가 앞에 오도록
-  const g = [['프론트', ['Frontend', 'Build']], ['서버·DB', ['Backend', 'Database', 'AI', 'Test']], ['인프라', ['Infra']]]
-    .map(([label, cats]) => [label, (stack || []).filter(s => cats.includes(s.cat))]);
-  const langs = (stack || []).filter(s => s.cat === 'Language');
-  if (langs.length) { const i = g[0][1].length || !g[1][1].length ? 0 : 1; if (!g[0][1].length && !g[1][1].length) g[0][0] = '언어'; g[i][1] = [...langs, ...g[i][1]]; }
+  const g = [['언어', ['Language']], ['프론트', ['Frontend', 'Build']], ['서버·DB', ['Backend', 'Database', 'AI', 'Test']], ['인프라', ['Infra']]]
+    .map(([label, cats]) => [label, stack.filter(s => cats.includes(s.cat))]);
   return g.filter(([, l]) => l.length).map(([label, l]) => `<div class="sl"><b>${label}</b>${l.map(tech).join(' · ')}</div>`).join('');
 }
 function envCell(p) {                      // 기술 스택을 읽었으면 버전과 함께, 못 읽었으면(정적 사이트 등) 직접 적은 값
@@ -47,6 +45,16 @@ function card(p, no, edit) {
     <dl>${row(p, 'name', '프로젝트명', 1)}${row(p, 'period', '기간', 1)}${row(p, 'people', '인원', 1)}${solo ? '' : row(p, 'role', '개발 담당', 1)}${envCell(p)}${row(p, 'result', '프로젝트 성과')}${row(p, 'note', '비고')}</dl>
     ${blocks ? `<div class="blocks">${blocks}</div>` : ''}
   </div>${edit ? `<button class="pencil" data-edit="${esc(p.key)}" aria-label="수정" title="수정">${PENCIL}</button>` : ''}</article>`;
+}
+
+function cardWide(p, no, edit) {
+  const imgs = p.images.slice(0, 3).map(u => `<img src="${esc(u)}" alt="">`).join('') || '<span class="none">스크린샷 없음</span>';
+  const solo = /^1인/.test(p.people);
+  const list = (title, v) => { const l = lines(v); return l.length ? `<div class="blk"><h4>${title}</h4><ul>${l.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''; };
+  const blocks = list('역할', p.roleDetail) + list('핵심 성과', p.achievements) + list('지표', p.metrics) + list('AI 활용', p.ai);
+  return `<article class="card l2" data-key="${esc(p.key)}"><div class="lcol"><div class="shots">${imgs}</div><div class="facts"><dl>${row(p, 'name', '프로젝트명', 1)}${row(p, 'period', '기간', 1)}${row(p, 'people', '인원', 1)}${solo ? '' : row(p, 'role', '개발 담당', 1)}${row(p, 'result', '프로젝트 성과')}${row(p, 'note', '비고')}${envCell(p)}</dl></div></div>
+    <div class="info"><h3><span class="no">${no}.</span><span>${esc(p.title)}</span></h3>${blocks ? `<div class="blocks">${blocks}</div>` : '<p class="nodetail">역할·핵심 성과를 연필(수정)에서 적으면 이 칸에 표시됩니다.</p>'}</div>
+  ${edit ? `<button class="pencil" data-edit="${esc(p.key)}" aria-label="수정" title="수정">${PENCIL}</button>` : ''}</article>`;
 }
 
 // ---------- 맨 위 요약 (한 쪽): 기술 스택 전체 + 경진대회 + 자격증 + AI 활용 기준 ----------
@@ -90,7 +98,7 @@ function renderPages(d, edit) {
     const list = ordered.filter(p => p.section === sec);
     for (let i = 0; i < list.length; i += per) {
       html += `<section class="page${per === 1 ? ' one' : ''}"><header><h2>${SECTIONS[sec]}</h2><span class="sub">최신순</span><span class="who">${esc(d.user.name || d.user.login)} · github.com/${esc(d.user.login)}</span></header>
-        <div class="cards">${list.slice(i, i + per).map(p => card(p, ++no, edit)).join('')}</div></section>`;
+        <div class="cards">${list.slice(i, i + per).map(p => (per === 1 ? cardWide : card)(p, ++no, edit)).join('')}</div></section>`;
     }
   }
   return html;

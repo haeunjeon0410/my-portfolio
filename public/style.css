@@ -159,20 +159,27 @@ body.print .tools { display: none !important; }
 .info .blk li { margin-bottom: 0.3mm; }
 .chip u { text-decoration: none; color: #9aa3b2; margin-left: 1.2mm; font-size: 7pt; }
 
-/* ---------- 카드가 적을 때: 한 쪽에 한 개, 글자를 크게 ---------- */
-.page.one .info { padding: 7mm 9mm; }
-.page.one .info h3 { font-size: 15.5pt; margin-bottom: 5mm; gap: 3mm; }
-.page.one .info dl { grid-template-columns: 27mm 1fr; row-gap: 2.4mm; }
-.page.one .info dt { font-size: 9.5pt; }
-.page.one .info dd { font-size: 11.5pt; line-height: 1.45; }
-.page.one .info dd small { font-size: 10pt; }
-.page.one .info dd.stk .sl { font-size: 10.5pt; line-height: 1.5; margin-bottom: 0.8mm; }
-.page.one .info dd.stk .sl b { min-width: 16mm; font-size: 9pt; }
-.page.one .info .blocks { margin-top: 5mm; padding-top: 4mm; }
-.page.one .info .blk h4 { font-size: 9.5pt; margin-bottom: 1.6mm; }
-.page.one .info .blk ul { font-size: 11pt; line-height: 1.55; padding-left: 4.4mm; }
-.page.one .info .blk li { margin-bottom: 1mm; }
-.page.one .shots { padding: 6mm; }
+/* ---------- 카드가 적을 때: 한 쪽에 한 개 — 왼쪽(화면+사실), 오른쪽(내가 한 일) ---------- */
+.card.l2 { grid-template-columns: 38% 1fr; }
+.card.l2 .lcol { display: flex; flex-direction: column; min-height: 0; border-right: 0.3mm solid #e3e7ee; }
+.card.l2 .shots { flex: none; height: 66mm; padding: 4mm; border-bottom: 0.3mm solid #e3e7ee; }
+.card.l2 .facts { flex: 1; min-height: 0; padding: 4mm 5mm; overflow: hidden; }
+.card.l2 .facts dl { margin: 0; display: grid; grid-template-columns: 18mm 1fr; row-gap: 1.5mm; align-items: baseline; }
+.card.l2 .facts dt { font-size: 8.2pt; font-weight: 700; color: var(--label); }
+.card.l2 .facts dd { margin: 0; font-size: 9.6pt; line-height: 1.38; }
+.card.l2 .facts dd small { display: block; font-size: 8.6pt; color: #666; }
+.card.l2 .facts dd.stk .sl { font-size: 8.6pt; line-height: 1.45; margin-bottom: 0.6mm; }
+.card.l2 .facts dd.stk .sl b { display: block; min-width: 0; margin: 0; font-size: 7.6pt; font-weight: 500; color: #9aa3b2; }
+.card.l2 .facts dd.stk .sl i { font-style: normal; color: #2f5597; }
+.card.l2 .info { padding: 7mm 8mm; justify-content: flex-start; overflow: hidden; }
+.card.l2 .info h3 { font-size: 15pt; line-height: 1.4; margin: 0 0 5mm; }
+.card.l2 .info .blocks { display: block; margin: 0; padding: 0; border: 0; }
+.card.l2 .blk { margin-bottom: 4.2mm; }
+.card.l2 .blk h4 { margin: 0 0 1.4mm; font-size: 9.5pt; font-weight: 700; color: var(--label); }
+.card.l2 .blk ul { margin: 0; padding-left: 4.4mm; font-size: 10.6pt; line-height: 1.5; }
+.card.l2 .blk li { margin-bottom: 1mm; }
+.card.l2 .nodetail { color: #b4bac6; font-size: 10pt; }
+.page.one .cards { grid-template-rows: 1fr; }
 
 /* ---------- 요약 쪽 글자 키우기 ---------- */
 .summary .sblock h4 { font-size: 12pt; }
