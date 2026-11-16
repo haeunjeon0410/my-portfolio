@@ -18,7 +18,7 @@ const verGt = (a, b) => { const x = verKey(a), y = verKey(b); for (let i = 0; i 
 const tech = (s) => `${esc(s.name)}${s.ver ? ` <i>${esc(s.ver)}</i>` : ''}`;
 // 카드 안에서는 3줄로 묶어 보여 준다: 프론트·화면 / 서버·DB / 인프라. 언어는 앞쪽 줄에 붙인다.
 function stackLines(stack, extraLangs = []) {
-  stack = [...(stack || [])]; for (const l of extraLangs) if (!stack.some(s => s.name === l)) stack.unshift({ name: l, cat: 'Language', ver: '' });
+  stack = [...(stack || [])]; for (const l of [...extraLangs].reverse()) if (!stack.some(s => s.name === l)) stack.unshift({ name: l, cat: 'Language', ver: '' });     // 많이 쓴 언어가 앞에 오도록
   const g = [['프론트', ['Frontend', 'Build']], ['서버·DB', ['Backend', 'Database', 'AI', 'Test']], ['인프라', ['Infra']]]
     .map(([label, cats]) => [label, (stack || []).filter(s => cats.includes(s.cat))]);
   const langs = (stack || []).filter(s => s.cat === 'Language');
