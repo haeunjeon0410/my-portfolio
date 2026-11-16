@@ -132,7 +132,6 @@ body.print .tools { display: none !important; }
 /* ---------- 요약 페이지 ---------- */
 .summary .tag { margin: -2mm 0 4mm; font-size: 10.5pt; color: #444; }
 .sgrid { flex: 1; display: grid; grid-template-columns: 1.55fr 1fr; gap: 9mm; min-height: 0; }
-.sgrid.two { grid-template-columns: 1fr 1fr; flex: none; }
 .scol { display: flex; flex-direction: column; gap: 5mm; min-height: 0; }
 .sblock h4 { margin: 0 0 2.2mm; font-size: 10pt; padding-bottom: 1.2mm; border-bottom: 0.3mm solid #d5d9e0; }
 .sblock h4 small, .stackbox h4 small, .idx h4 small { font-weight: 400; color: #8a93a3; font-size: 7.5pt; margin-left: 1mm; }
@@ -144,31 +143,18 @@ body.print .tools { display: none !important; }
 .chip { display: inline-block; margin: 0.5mm 1.2mm 0.5mm 0; padding: 0.4mm 2mm; border: 0.2mm solid #d5d9e0; border-radius: 1.2mm; font-size: 8.2pt; line-height: 1.5; background: #fff; white-space: nowrap; }
 .chip i { font-style: normal; color: #2f5597; }
 .chip u { text-decoration: none; color: #9aa3b2; margin-left: 1mm; font-size: 7.5pt; }
-.ptable { width: 100%; border-collapse: collapse; font-size: 8pt; }
-.ptable th { text-align: left; font-size: 7.5pt; color: var(--label); font-weight: 700; padding: 0 1.5mm 1.2mm; border-bottom: 0.3mm solid #222; }
-.ptable td { padding: 1.35mm 1.5mm; border-bottom: 0.2mm solid #edf0f4; vertical-align: top; line-height: 1.35; }
-.ptable td.n { color: #2f5597; font-weight: 700; width: 5mm; }
-.idx { margin-top: 5mm; }
-.idxgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4mm 7mm; font-size: 8.2pt; }
-.idxgrid > div { display: flex; gap: 2mm; align-items: baseline; border-bottom: 0.2mm solid #edf0f4; padding-bottom: 0.8mm; }
-.idxgrid b { white-space: nowrap; }
-.idxgrid span { color: #666; }
 
-/* ---------- 프로젝트 상세 (한 쪽에 한 프로젝트) ---------- */
-.dcard { position: relative; flex: 1; display: grid; grid-template-columns: 41% 1fr; border: 0.3mm solid #d5d9e0; border-radius: 1mm; overflow: hidden; min-height: 0; }
-.dinfo { padding: 4mm 5.5mm; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
-.dinfo h3 { margin: 0 0 3mm; font-size: 11.5pt; line-height: 1.4; display: flex; gap: 2.5mm; }
-.dinfo h3 .no { color: #2f5597; }
-.dinfo dl { margin: 0; display: grid; grid-template-columns: 22mm 1fr; row-gap: 1.3mm; align-items: baseline; }
-.dinfo dt { font-size: 7.6pt; font-weight: 700; color: var(--label); }
-.dinfo dd { margin: 0; font-size: 9pt; line-height: 1.4; }
-.dinfo dd small { display: block; font-size: 8pt; color: #666; margin-top: .4mm; }
-.stackbox { margin-top: 2.6mm; padding-top: 2mm; border-top: 0.2mm solid #e3e7ee; }
-.stackbox h4, .blk h4 { margin: 0 0 1mm; font-size: 7.6pt; font-weight: 700; color: var(--label); }
-.srow2 { display: grid; grid-template-columns: 22mm 1fr; align-items: start; }
-.srow2 > b { font-size: 7.6pt; color: #9aa3b2; font-weight: 500; padding-top: 0.9mm; }
-.blocks { margin-top: 2.6mm; padding-top: 2mm; border-top: 0.2mm solid #e3e7ee; display: grid; grid-template-columns: 1fr 1fr; gap: 2.4mm 6mm; min-height: 0; }
-.blk ul { margin: 0; padding-left: 3.6mm; font-size: 8.3pt; line-height: 1.45; }
-.blk li { margin-bottom: 0.5mm; }
-.blocks:empty, .stackbox:empty { display: none; }
-body.print .dcard { border-color: #d5d9e0; }
+/* ---------- 카드 안: 기술 스택 줄, 역할·핵심 성과 ---------- */
+.info { padding: 3.2mm 5mm; justify-content: flex-start; }
+.info h3 { margin: 0 0 2.6mm; font-size: 11.2pt; }
+.info dl { row-gap: 1.1mm; grid-template-columns: 21mm 1fr; }
+.info dt { font-size: 7.4pt; }
+.info dd { font-size: 8.9pt; line-height: 1.38; }
+.info dd.stk .sl { font-size: 8.2pt; line-height: 1.42; }
+.info dd.stk .sl b { display: inline-block; min-width: 11mm; margin-right: 1.5mm; font-size: 7.4pt; font-weight: 500; color: #9aa3b2; }
+.info dd.stk .sl i { font-style: normal; color: #2f5597; }
+.info .blocks { margin-top: 2.2mm; padding-top: 1.8mm; border-top: 0.2mm solid #e3e7ee; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 1.6mm 5mm; }
+.info .blk h4 { margin: 0 0 0.6mm; font-size: 7.4pt; font-weight: 700; color: var(--label); }
+.info .blk ul { margin: 0; padding-left: 3.4mm; font-size: 8pt; line-height: 1.38; }
+.info .blk li { margin-bottom: 0.3mm; }
+.chip u { text-decoration: none; color: #9aa3b2; margin-left: 1.2mm; font-size: 7pt; }

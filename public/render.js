@@ -10,22 +10,46 @@ function row(p, field, label, always) {
   const body = ls.length ? `${esc(ls[0])}${ls.slice(1).map(l => `<small>${esc(l)}</small>`).join('')}` : '<span class="empty-hint">-</span>';
   return `<dt>${label}</dt><dd>${body}</dd>`;
 }
-function card(p, no, edit) {
-  const imgs = p.images.slice(0, 3).map(u => `<img src="${esc(u)}" alt="">`).join('') || '<span class="none">스크린샷 없음</span>';
-  const solo = /^1인/.test(p.people);
-  return `<article class="card" data-key="${esc(p.key)}"><div class="shots">${imgs}</div><div class="info">
-    <h3><span class="no">${no}.</span><span>${esc(p.title)}</span></h3>
-    <dl>${row(p, 'name', '프로젝트명', 1)}${row(p, 'period', '기간', 1)}${row(p, 'people', '인원', 1)}${row(p, 'env', '언어 및 환경', 1)}${solo ? '' : row(p, 'role', '개발 담당', 1)}${row(p, 'result', '프로젝트 성과')}${row(p, 'note', '비고')}</dl>
-  </div>${edit ? `<button class="pencil" data-edit="${esc(p.key)}" aria-label="수정" title="수정">${PENCIL}</button>` : ''}</article>`;
-}
-// ---------- 기술 스택 도우미 ----------
+
+// ---------- 기술 스택 ----------
 const CATS = [['Language', '언어'], ['Frontend', '프론트엔드'], ['Backend', '백엔드'], ['Database', '데이터베이스'], ['AI', 'AI'], ['Infra', '인프라·배포'], ['Build', '빌드'], ['Test', '테스트']];
 const verKey = (v) => String(v || '').split(/[.\-]/).map(x => parseInt(x, 10) || 0);
 const verGt = (a, b) => { const x = verKey(a), y = verKey(b); for (let i = 0; i < Math.max(x.length, y.length); i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); } return false; };
-const stackByCat = (stack) => CATS.map(([k, label]) => [label, (stack || []).filter(s => s.cat === k)]).filter(([, l]) => l.length);
-const chip = (s) => `<span class="chip">${esc(s.name)}${s.ver ? ` <i>${esc(s.ver)}</i>` : ''}</span>`;
+const tech = (s) => `${esc(s.name)}${s.ver ? ` <i>${esc(s.ver)}</i>` : ''}`;
+// 카드 안에서는 3줄로 묶어 보여 준다: 프론트·화면 / 서버·DB / 인프라. 언어는 앞쪽 줄에 붙인다.
+function stackLines(stack, extraLangs = []) {
+  stack = [...(stack || [])]; for (const l of extraLangs) if (!stack.some(s => s.name === l)) stack.unshift({ name: l, cat: 'Language', ver: '' });
+  const g = [['프론트', ['Frontend', 'Build']], ['서버·DB', ['Backend', 'Database', 'AI', 'Test']], ['인프라', ['Infra']]]
+    .map(([label, cats]) => [label, (stack || []).filter(s => cats.includes(s.cat))]);
+  const langs = (stack || []).filter(s => s.cat === 'Language');
+  if (langs.length) { const i = g[0][1].length || !g[1][1].length ? 0 : 1; if (!g[0][1].length && !g[1][1].length) g[0][0] = '언어'; g[i][1] = [...langs, ...g[i][1]]; }
+  return g.filter(([, l]) => l.length).map(([label, l]) => `<div class="sl"><b>${label}</b>${l.map(tech).join(' · ')}</div>`).join('');
+}
+function envCell(p) {                      // 기술 스택을 읽었으면 버전과 함께, 못 읽었으면(정적 사이트 등) 직접 적은 값
+  const sl = stackLines(p.stack, p.langs);
+  if (!sl) return row(p, 'env', '언어 및 환경', 1);
+  // 직접 적어 둔 환경 값 중 스택에서 읽히지 않은 것(예: Vercel, AI API)은 잃지 않도록 '기타'로 붙인다
+  const known = new Set([...(p.stack || []).map(s => s.name), ...(p.langs || [])].map(x => x.toLowerCase().replace(/[^a-z0-9가-힣]/g, '')));
+  const norm = (t) => t.toLowerCase().replace(/\(.*\)/, '').replace(/[^a-z0-9가-힣]/g, '');
+  const dup = (t) => known.has(norm(t)) || [...known].some(k => k && norm(t).length >= 4 && (k.startsWith(norm(t)) || norm(t).startsWith(k)));
+  const extra = String(p.env || '').split(/,\s*/).map(t => t.trim()).filter(t => t && !dup(t) && !/^(react|vite|typescript|javascript|python|docker)|pwa|바닐라/i.test(t));
+  return `<dt>언어 및 환경</dt><dd class="stk">${sl}${extra.length ? `<div class="sl"><b>기타</b>${extra.map(esc).join(' · ')}</div>` : ''}</dd>`;
+}
 
-// 전체 요약: 어떤 기술을 몇 개 프로젝트에서, 어떤 버전으로 썼는지
+// ---------- 카드 (한 쪽에 두 개) ----------
+function card(p, no, edit) {
+  const imgs = p.images.slice(0, 3).map(u => `<img src="${esc(u)}" alt="">`).join('') || '<span class="none">스크린샷 없음</span>';
+  const solo = /^1인/.test(p.people);
+  const list = (title, v) => { const l = lines(v); return l.length ? `<div class="blk"><h4>${title}</h4><ul>${l.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''; };
+  const blocks = list('역할', p.roleDetail) + list('핵심 성과', p.achievements) + list('지표', p.metrics) + (p.ai ? list('AI 활용', p.ai) : '');
+  return `<article class="card" data-key="${esc(p.key)}"><div class="shots">${imgs}</div><div class="info">
+    <h3><span class="no">${no}.</span><span>${esc(p.title)}</span></h3>
+    <dl>${row(p, 'name', '프로젝트명', 1)}${row(p, 'period', '기간', 1)}${row(p, 'people', '인원', 1)}${solo ? '' : row(p, 'role', '개발 담당', 1)}${envCell(p)}${row(p, 'result', '프로젝트 성과')}${row(p, 'note', '비고')}</dl>
+    ${blocks ? `<div class="blocks">${blocks}</div>` : ''}
+  </div>${edit ? `<button class="pencil" data-edit="${esc(p.key)}" aria-label="수정" title="수정">${PENCIL}</button>` : ''}</article>`;
+}
+
+// ---------- 맨 위 요약 (한 쪽): 기술 스택 전체 + 경진대회 + 자격증 + AI 활용 기준 ----------
 function aggregate(projects) {
   const m = new Map();
   projects.forEach((p, i) => {
@@ -41,62 +65,34 @@ function awardsOf(d) {
   for (const c of (d.profile && d.profile.competitions) || []) list.push({ text: typeof c === 'string' ? c : [c.name, c.award].filter(Boolean).join(' '), project: typeof c === 'string' ? '' : (c.project || ''), no: 0 });
   return list;
 }
-
-function summaryPages(d) {
-  const agg = aggregate(d.projects), user = esc(d.user.name || d.user.login), pf = d.profile || {};
-  const head = (t, sub) => `<header><h2>${t}</h2><span class="sub">${sub || ''}</span><span class="who">${user} · github.com/${esc(d.user.login)}</span></header>`;
+function summaryPage(d) {
+  const agg = aggregate(d.projects), pf = d.profile || {}, ai = pf.ai || {}, awards = awardsOf(d), certs = pf.certs || [];
   const rows = CATS.map(([k, label]) => {
     const l = agg.filter(a => a.cat === k).sort((x, y) => y.nos.length - x.nos.length || x.name.localeCompare(y.name));
-    return l.length ? `<div class="srow"><b>${label}</b><div>${l.map(a => `<span class="chip">${esc(a.name)}${a.ver ? ` <i>${esc(a.ver)}</i>` : ''}${a.nos.length > 1 ? `<u>×${a.nos.length}</u>` : ''}</span>`).join('')}</div></div>` : '';
+    return l.length ? `<div class="srow"><b>${label}</b><div>${l.map(a => `<span class="chip">${esc(a.name)}${a.ver ? ` <i>${esc(a.ver)}</i>` : ''}<u>${a.nos.length > 5 ? '×' + a.nos.length : a.nos.join(',')}</u></span>`).join('')}</div></div>` : '';
   }).join('');
-  const awards = awardsOf(d), certs = pf.certs || [], ai = pf.ai || {};
   const block = (title, body) => body ? `<section class="sblock"><h4>${title}</h4>${body}</section>` : '';
-  const p1 = `<section class="page summary">${head('요약', `프로젝트 ${d.projects.length}개`)}
+  return `<section class="page summary"><header><h2>요약</h2><span class="sub">프로젝트 ${d.projects.length}개</span><span class="who">${esc(d.user.name || d.user.login)} · github.com/${esc(d.user.login)}</span></header>
     ${pf.tagline ? `<p class="tag">${esc(pf.tagline)}</p>` : ''}
-    <div class="sgrid"><div class="scol">${block('기술 스택 <small>(선언된 버전 기준 · ×N은 사용한 프로젝트 수)</small>', rows)}</div>
+    <div class="sgrid"><div class="scol">${block('기술 스택 <small>(선언된 버전 기준 · 옆 숫자는 사용한 프로젝트 번호, ×N은 N개 프로젝트)</small>', rows)}</div>
     <div class="scol">${block('경진대회·수상', awards.length ? `<ul>${awards.map(a => `<li>${esc(a.text)}${a.project ? ` <small>${esc(a.project)}${a.no ? ` (${a.no}번)` : ''}</small>` : ''}</li>`).join('')}</ul>` : '')}
     ${block('자격증', certs.length ? `<ul>${certs.map(c => `<li>${esc(typeof c === 'string' ? c : [c.name, c.date].filter(Boolean).join(' · '))}</li>`).join('')}</ul>` : '')}
     ${block('AI 활용(바이브코딩) 기준', (ai.statement ? `<p>${esc(ai.statement)}</p>` : '') + (ai.criteria && ai.criteria.length ? `<ul>${ai.criteria.map(c => `<li>${esc(c)}</li>`).join('')}</ul>` : ''))}</div></div></section>`;
-  // 2쪽: 프로젝트 한눈에 + 기술별 색인
-  const half = Math.ceil(d.projects.length / 2);
-  const trow = (p, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(p.name)}</b></td><td>${esc(p.period)}</td><td>${esc(p.people)}${p.role && !/^1인/.test(p.people) ? ' · ' + esc(p.role) : ''}</td></tr>`;
-  const tbl = (from, to) => `<table class="ptable"><thead><tr><th>#</th><th>프로젝트</th><th>기간</th><th>인원 · 역할</th></tr></thead><tbody>${d.projects.slice(from, to).map((p, i) => trow(p, from + i)).join('')}</tbody></table>`;
-  const idx = agg.filter(a => a.nos.length).sort((x, y) => y.nos.length - x.nos.length || x.name.localeCompare(y.name)).slice(0, 18);
-  const p2 = `<section class="page summary">${head('프로젝트 · 기술별 분류', '한눈에 보기')}
-    <div class="sgrid two"><div>${tbl(0, half)}</div><div>${tbl(half, d.projects.length)}</div></div>
-    <section class="sblock idx"><h4>기술별 프로젝트 색인 <small>(숫자는 프로젝트 번호)</small></h4><div class="idxgrid">${idx.map(a => `<div><b>${esc(a.name)}</b><span>${a.nos.join(', ')}</span></div>`).join('')}</div></section></section>`;
-  return p1 + p2;
 }
 
-// 프로젝트 상세: 한 쪽에 한 프로젝트
-function detailCard(p, no, total, user, edit) {
-  const imgs = p.images.slice(0, 3).map(u => `<img src="${esc(u)}" alt="">`).join('') || '<span class="none">스크린샷 없음</span>';
-  const solo = /^1인/.test(p.people);
-  const list = (title, v) => { const l = lines(v); return l.length ? `<div class="blk"><h4>${title}</h4><ul>${l.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''; };
-  const stackRows = stackByCat(p.stack).map(([label, l]) => `<div class="srow2"><b>${label}</b><div>${l.map(chip).join('')}</div></div>`).join('');
-  const header = `<header><h2>${SECTIONS[p.section]}</h2><span class="sub">${no} / ${total}</span><span class="who">${esc(user.name || user.login)} · github.com/${esc(user.login)}</span></header>`;
-  return `<section class="page detail">${header}<article class="dcard" data-key="${esc(p.key)}"><div class="shots">${imgs}</div><div class="dinfo">
-    <h3><span class="no">${no}.</span><span>${esc(p.title)}</span></h3>
-    <dl>${row(p, 'name', '프로젝트명', 1)}${row(p, 'period', '기간', 1)}${row(p, 'people', '인원', 1)}${solo ? '' : row(p, 'role', '개발 담당', 1)}${row(p, 'env', '언어 및 환경', 1)}${row(p, 'result', '프로젝트 성과')}${row(p, 'note', '비고')}</dl>
-    ${stackRows ? `<div class="stackbox"><h4>기술 스택 <small>(버전)</small></h4>${stackRows}</div>` : ''}
-    <div class="blocks">${list('역할', p.roleDetail)}${list('핵심 성과', p.achievements)}${list('지표', p.metrics)}${list('기술 근거', p.facts)}${p.ai ? list('AI 활용', p.ai) : ''}</div>
-  </div>${edit ? `<button class="pencil" data-edit="${esc(p.key)}" aria-label="수정" title="수정">${PENCIL}</button>` : ''}</article></section>`;
-}
-
-function renderPages(d, edit, layout = 'detail') {
+function renderPages(d, edit) {
   if (!d.projects.length) return '<p class="empty">아직 카드가 없습니다. "업데이트"를 눌러 GitHub에서 불러오세요.</p>';
-  if (layout === 'compact') {                                              // 예전 방식: 한 쪽에 두 개
-    let no = 0, html = '';
-    for (const sec of ['team', 'solo']) {
-      const list = d.projects.filter(p => p.section === sec);
-      for (let i = 0; i < list.length; i += 2) html += `<section class="page"><header><h2>${SECTIONS[sec]}</h2><span class="sub">최신순</span><span class="who">${esc(d.user.name || d.user.login)} · github.com/${esc(d.user.login)}</span></header>
+  // 요약의 프로젝트 번호와 카드 번호를 같게 한다 (팀 먼저, 개인 다음)
+  const ordered = ['team', 'solo'].flatMap(sec => d.projects.filter(p => p.section === sec));
+  let no = 0, html = summaryPage({ ...d, projects: ordered });
+  for (const sec of ['team', 'solo']) {
+    const list = ordered.filter(p => p.section === sec);
+    for (let i = 0; i < list.length; i += 2) {
+      html += `<section class="page"><header><h2>${SECTIONS[sec]}</h2><span class="sub">최신순</span><span class="who">${esc(d.user.name || d.user.login)} · github.com/${esc(d.user.login)}</span></header>
         <div class="cards">${list.slice(i, i + 2).map(p => card(p, ++no, edit)).join('')}</div></section>`;
     }
-    return html;
   }
-  // 상세: 요약 2쪽 + 프로젝트마다 한 쪽. 번호는 요약과 같다(팀 먼저, 개인 다음).
-  const ordered = ['team', 'solo'].flatMap(sec => d.projects.filter(p => p.section === sec));
-  return summaryPages({ ...d, projects: ordered }) + ordered.map((p, i) => detailCard(p, i + 1, ordered.length, d.user, edit)).join('');
+  return html;
 }
 
 // 사진 개수와 가로·세로 비율을 보고 사진 칸 배치를 정한다. (화면 미리보기와 PDF 모두 같은 규칙)

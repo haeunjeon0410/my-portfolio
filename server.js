@@ -56,7 +56,7 @@ function makePdf(keys) {                                       // keys 가 있�
   pdfChain = job.catch(() => {});
   return job;
 }
-const pageCount = (list) => (list.length ? 2 + list.length : 0);                  // 요약 2쪽 + 프로젝트마다 1쪽
+const pageCount = (list) => (list.length ? 1 + ['team', 'solo'].reduce((n, k) => n + Math.ceil(list.filter(p => p.section === k).length / 2), 0) : 0);     // 요약 1쪽 + 카드 2개씩
 function pdfInfo(list) {
   let st; try { st = fs.statSync(PDF_FILE); } catch { return { exists: false }; }
   const l = list || build().projects;
