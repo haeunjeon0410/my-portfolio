@@ -203,3 +203,20 @@ body.print .tools { display: none !important; }
 .summary .scol { gap: 4mm; }
 .summary .sblock h4 { font-size: 11pt; margin-bottom: 1.6mm; }
 .summary .sblock ul, .summary .sblock p { font-size: 10.2pt; line-height: 1.55; }
+
+/* ---------- 요약: 주요 기술은 크게, 나머지는 회색 줄 ---------- */
+.summary .srow { display: grid; grid-template-columns: 25mm 1fr; gap: 3mm; padding: 2.4mm 0; border-bottom: 0.2mm solid #edf0f4; }
+.summary .srow > b { font-size: 9.5pt; color: var(--label); padding-top: 0.6mm; }
+.summary .srow .main { display: flex; flex-wrap: wrap; gap: 0.6mm 6mm; font-size: 11.5pt; }
+.summary .it { white-space: nowrap; font-weight: 600; }
+.summary .it i { font-style: normal; font-weight: 400; color: #2f5597; }
+.summary .it.nov { color: #9aa3b2; font-weight: 400; }
+.summary .srow .rest { margin-top: 1.2mm; font-size: 8.8pt; line-height: 1.7; color: #7b8494; }
+.summary .srow .rest .it { font-weight: 400; color: #6b7280; }
+.summary .srow .rest .it i { color: #7d93c0; }
+.summary .srow .rest .it.nov { color: #b4bac6; }
+.summary .steps { list-style: none; margin: 1mm 0 0; padding: 0; }
+.summary .steps li { display: grid; grid-template-columns: 15mm 1fr; padding: 1.6mm 0; border-bottom: 0.2mm solid #edf0f4; font-size: 10.4pt; line-height: 1.45; }
+.summary .steps b { color: #2f5597; }
+.summary .sblock p.ev { margin-top: 2mm; font-size: 8.8pt; color: #7b8494; line-height: 1.55; }
+.blk li b { font-weight: 700; }

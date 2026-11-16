@@ -42,7 +42,7 @@ function envCell(p) {                      // 기술 스택을 읽었으면 버�
 function card(p, no, edit) {
   const imgs = p.images.slice(0, 3).map(u => `<img src="${esc(u)}" alt="">`).join('') || '<span class="none">스크린샷 없음</span>';
   const solo = /^1인/.test(p.people);
-  const list = (title, v) => { const l = lines(v); return l.length ? `<div class="blk"><h4>${title}</h4><ul>${l.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''; };
+  const list = (title, v) => { const l = lines(v); return l.length ? `<div class="blk"><h4>${title}</h4><ul>${l.map(x => `<li>${emph(x)}</li>`).join('')}</ul></div>` : ''; };
   const blocks = list('역할', p.roleDetail) + list('핵심 성과', p.achievements) + list('지표', p.metrics) + (p.ai ? list('AI 활용', p.ai) : '');
   return `<article class="card" data-key="${esc(p.key)}"><div class="shots">${imgs}</div><div class="info">
     <h3><span class="no">${no}.</span><span>${esc(p.title)}</span></h3>
@@ -54,7 +54,7 @@ function card(p, no, edit) {
 function cardWide(p, no, edit) {
   const imgs = p.images.slice(0, 3).map(u => `<img src="${esc(u)}" alt="">`).join('') || '<span class="none">스크린샷 없음</span>';
   const solo = /^1인/.test(p.people);
-  const list = (title, v) => { const l = lines(v); return l.length ? `<div class="blk"><h4>${title}</h4><ul>${l.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''; };
+  const list = (title, v) => { const l = lines(v); return l.length ? `<div class="blk"><h4>${title}</h4><ul>${l.map(x => `<li>${emph(x)}</li>`).join('')}</ul></div>` : ''; };
   const blocks = list('역할', p.roleDetail) + list('핵심 성과', p.achievements) + list('지표', p.metrics) + list('AI 활용', p.ai);
   return `<article class="card l2" data-key="${esc(p.key)}"><div class="lcol"><div class="shots">${imgs}</div><div class="facts"><dl>${row(p, 'name', '프로젝트명', 1)}${row(p, 'period', '기간', 1)}${row(p, 'people', '인원', 1)}${solo ? '' : row(p, 'role', '개발 담당', 1)}${row(p, 'result', '프로젝트 성과')}${row(p, 'note', '비고')}${envCell(p)}</dl></div></div>
     <div class="info"><h3><span class="no">${no}.</span><span>${esc(p.title)}</span></h3>${blocks ? `<div class="blocks">${blocks}</div>` : '<p class="nodetail">역할·핵심 성과를 연필(수정)에서 적으면 이 칸에 표시됩니다.</p>'}</div>
@@ -77,21 +77,30 @@ function awardsOf(d) {
   for (const c of (d.profile && d.profile.competitions) || []) list.push({ text: typeof c === 'string' ? c : [c.name, c.award].filter(Boolean).join(' '), project: typeof c === 'string' ? '' : (c.project || ''), no: 0 });
   return list;
 }
+// 주요 기술(프레임워크·DB·배포 등)은 크게, 그 외 라이브러리는 작은 회색 줄로 나눠 보여 준다.
+const MAIN = new Set(['React', 'Next.js', 'Tailwind CSS', 'React Router', 'Vite', 'PWA', 'Phaser', 'Three.js', 'Framer Motion', 'Flutter',
+  'NestJS', 'FastAPI', 'Express', 'Socket.IO', 'Prisma', 'PostgreSQL', 'Redis', 'OpenAI SDK', 'Docker', 'GitHub Actions', 'Vercel', 'Cloudflare Workers', 'AWS S3 SDK', 'Jest']);
+const emph = (s) => esc(s).replace(/(\d[\d,.]*\s?(?:개|줄|%|회|명|일|건))/g, '<b>$1</b>');     // 카드 항목의 숫자를 굵게
+
 function summaryPage(d) {
   const agg = aggregate(d.projects), pf = d.profile || {}, ai = pf.ai || {}, awards = awardsOf(d), certs = pf.certs || [];
-  const chipOf = (a) => `<span class="chip">${tech(a)}<u>${a.nos.length > 5 ? '×' + a.nos.length : a.nos.join(',')}</u></span>`;
+  const GROUPS = [['언어', ['Language']], ['프론트엔드', ['Frontend']], ['백엔드', ['Backend']], ['데이터베이스', ['Database']], ['AI', ['AI']], ['인프라·배포', ['Infra']], ['빌드·테스트', ['Build', 'Test']]];
   const sortAgg = (l) => l.sort((x, y) => y.nos.length - x.nos.length || x.name.localeCompare(y.name));
-  const rows = CATS.map(([k, label]) => {
-    const l = sortAgg(agg.filter(a => a.cat === k && !isService(a.name)));
-    return l.length ? `<div class="srow"><b>${label}</b><div>${l.map(chipOf).join('')}</div></div>` : '';
-  }).join('') + (() => { const l = sortAgg(agg.filter(a => isService(a.name))); return l.length ? `<div class="srow"><b>서비스·표준</b><div>${l.map(chipOf).join('')}</div></div>` : ''; })();
+  const item = (a) => `<span class="it${a.ver || isService(a.name) || a.cat === 'Language' ? '' : ' nov'}">${esc(a.name)}${a.ver ? ` <i>${esc(a.ver)}</i>` : ''}</span>`;
+  const rows = GROUPS.map(([label, cats]) => {
+    const l = sortAgg(agg.filter(a => cats.includes(a.cat))); if (!l.length) return '';
+    const main = l.filter(a => MAIN.has(a.name) || a.cat === 'Language'), rest = l.filter(a => !(MAIN.has(a.name) || a.cat === 'Language'));
+    return `<div class="srow"><b>${label}</b><div><div class="main">${main.map(item).join('')}</div>${rest.length ? `<div class="rest">${rest.map(item).join(' · ')}</div>` : ''}</div></div>`;
+  }).join('');
   const block = (title, body) => body ? `<section class="sblock"><h4>${title}</h4>${body}</section>` : '';
+  const steps = (ai.steps || []).length ? `<ol class="steps">${ai.steps.map(([k, v]) => `<li><b>${esc(k)}</b><span>${esc(v)}</span></li>`).join('')}</ol>` : '';
+  const aiBody = (ai.statement ? `<p>${esc(ai.statement)}</p>` : '') + steps + (ai.evidence ? `<p class="ev">${esc(ai.evidence)}</p>` : '') + (ai.note ? `<p class="ev">${esc(ai.note)}</p>` : '');
   return `<section class="page summary"><header><h2>요약</h2><span class="sub">프로젝트 ${d.projects.length}개</span><span class="who">${esc(d.user.name || d.user.login)} · github.com/${esc(d.user.login)}</span></header>
     ${pf.tagline ? `<p class="tag">${esc(pf.tagline)}</p>` : ''}
-    <div class="sgrid"><div class="scol">${block('기술 스택 <small>(설정 파일에 선언된 버전 · 옆 숫자는 사용한 프로젝트 번호 · 서비스·표준은 버전 없음)</small>', rows)}</div>
-    <div class="scol">${block('경진대회·수상', awards.length ? `<ul>${awards.map(a => `<li>${esc(a.text)}${a.project ? ` <small>${esc(a.project)}${a.no ? ` (${a.no}번)` : ''}</small>` : ''}</li>`).join('')}</ul>` : '')}
+    <div class="sgrid"><div class="scol">${block('기술 스택 <small>설정 파일에 선언된 버전 · 회색 이름은 버전 미고정</small>', rows)}</div>
+    <div class="scol">${block('경진대회·수상', awards.length ? `<ul>${awards.map(a => `<li>${esc(a.text)}${a.project ? ` <small>${esc(a.project)}</small>` : ''}</li>`).join('')}</ul>` : '')}
     ${block('자격증', certs.length ? `<ul>${certs.map(c => `<li>${esc(typeof c === 'string' ? c : [c.name, c.date].filter(Boolean).join(' · '))}</li>`).join('')}</ul>` : '')}
-    ${block('AI 활용(바이브코딩) 기준', (ai.statement ? `<p>${esc(ai.statement)}</p>` : '') + (ai.criteria && ai.criteria.length ? `<ul>${ai.criteria.map(c => `<li>${esc(c)}</li>`).join('')}</ul>` : ''))}</div></div></section>`;
+    ${block('AI 활용 방식', aiBody)}</div></div></section>`;
 }
 
 function renderPages(d, edit) {
