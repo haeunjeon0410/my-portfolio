@@ -128,3 +128,18 @@ test('뺀 저장소: 같은 저장소(포크)는 한 줄로 합치고, 이미 �
   assert.equal(l.find(x => x.repo === 'me/own').inCard, true);
   restoreProjects(o.keys); assert.equal(fresh().hiddenCount, 1);                                      // 같은 저장소의 이름을 모두 되살린다
 });
+
+// ---------- 기술 스택: 담당 역할에 맞는 것만 ----------
+const { roleKind, roleStack, topLangs } = require('../lib/build');
+test('담당 역할에 따라 보여 줄 기술을 가른다 (프론트는 서버·DB 제외, 백엔드는 화면 제외, 혼자는 모두)', () => {
+  const st = [{ name: 'React', cat: 'Frontend' }, { name: 'Vite', cat: 'Build' }, { name: 'Express', cat: 'Backend' }, { name: 'PostgreSQL', cat: 'Database' }, { name: 'TypeScript', cat: 'Language' }, { name: 'Vercel', cat: 'Infra' }];
+  const names = (l) => l.map(x => x.name).sort().join(',');
+  assert.equal(roleKind('프론트엔드 (팀장)'), 'fe'); assert.equal(roleKind('백엔드'), 'be'); assert.equal(roleKind(''), 'all'); assert.equal(roleKind('프론트·백엔드'), 'all');
+  assert.equal(names(roleStack(st, '프론트엔드')), 'React,TypeScript,Vercel,Vite');
+  assert.equal(names(roleStack(st, '백엔드')), 'Express,PostgreSQL,TypeScript,Vercel');
+  assert.equal(roleStack(st, '').length, 6);
+});
+test('언어 목록: 마크업·스크립트는 빼고, Flutter 가 만드는 플랫폼 폴더 언어는 직접 쓴 언어로 보지 않는다', () => {
+  assert.deepEqual(topLangs([{ langs: { JavaScript: 900, HTML: 5000, CSS: 800, Python: 100 } }]), ['JavaScript', 'Python']);
+  assert.deepEqual(topLangs([{ langs: { Dart: 800, Swift: 300, 'C++': 200, Kotlin: 100, HTML: 50 } }]), ['Dart']);
+});

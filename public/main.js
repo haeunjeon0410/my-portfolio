@@ -6,7 +6,8 @@ const get = async (url) => parse(await fetch(url));
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 let DATA = null, BUSY = false, AI = false;
 
-const FIELDS = [['title', '설명 (제목)'], ['name', '프로젝트명'], ['period', '기간'], ['people', '인원'], ['env', '언어 및 환경'], ['role', '개발 담당'], ['result', '프로젝트 성과'], ['note', '비고']];
+const FIELDS = [['title', '설명 (제목)'], ['name', '프로젝트명'], ['period', '기간'], ['people', '인원'], ['env', '언어 및 환경'], ['role', '개발 담당'], ['roleDetail', '역할 (줄마다 한 항목)'], ['achievements', '핵심 성과 (줄마다 한 항목)'], ['metrics', '지표 (예: LCP, DAU)'], ['result', '프로젝트 성과'], ['ai', 'AI 활용'], ['note', '비고']];
+const LINEF = new Set(['result', 'roleDetail', 'achievements', 'metrics']);       // 여러 줄로 적는 칸
 
 function setBusy(b, text) { BUSY = b; $('#make').disabled = b; $('#download').disabled = b; if (text !== undefined) $('#status').textContent = text; }
 async function load() {
@@ -172,7 +173,7 @@ $('#editForm').addEventListener('submit', async (e) => {
   dlg.querySelectorAll('textarea').forEach(t => {
     const f = t.dataset.f, now = t.value.trim(), was = (Array.isArray(p[f]) ? p[f].join('\n') : (p[f] || '')).trim();
     if (now === was) return;
-    patch[f] = now === '' ? null : (f === 'result' && now.includes('\n') ? now.split('\n').map(s => s.trim()).filter(Boolean) : now);
+    patch[f] = now === '' ? null : (LINEF.has(f) && now.includes('\n') ? now.split('\n').map(s => s.trim()).filter(Boolean) : now);
   });
   const sec = dlg.querySelector('input[name=sec]:checked'); if (sec && sec.value !== p.section) patch.section = sec.value;
   if (JSON.stringify(SEL) !== JSON.stringify(p.images)) patch.images = SEL.length ? SEL : null;

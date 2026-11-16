@@ -1,0 +1,6 @@
+{
+  "tagline": "한 줄 소개 (선택)",
+  "certs": ["자격증 이름 · 취득일", { "name": "AWS Certified Solutions Architect – Professional", "date": "2027.03 (예정)" }],
+  "competitions": [{ "name": "대회 이름", "award": "수상 내역", "project": "프로젝트명" }],
+  "ai": { "statement": "AI 활용 방식 한 문장", "criteria": ["직접 한 것", "AI 도구에 맡긴 것"] }
+}

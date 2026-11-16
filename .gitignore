@@ -8,3 +8,4 @@ data/config.json
 *.pdf
 node_modules/
 *.log
+data/profile.json

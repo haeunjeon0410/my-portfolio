@@ -16,7 +16,8 @@ GitHub 저장소 기반 카드형 A4 PDF 포트폴리오 생성 앱. 로컬 실�
 - 자동 입력: 기간(코드 커밋), 인원·역할(README 팀 표), 언어·환경, 사진(README 이미지)
 - AI 제목(선택): 새 저장소를 넣을 때 README 기반 한 줄 제목 초안 작성, 수정 창의 "AI로 쓰기"로 후보 3개(포괄형·간결형·문제해결형) 생성 후 선택. 모델 gpt-6-luna(학교 API Gateway). 키가 없거나 실패하면 README 추출값 사용. 기간·인원·성과는 AI 미사용
 - 카드 수정: 구분(팀/개인), 설명, 성과, 사진 최대 3장
-- 출력: 화면과 동일한 렌더링의 PDF
+- 기술 스택·버전: 저장소의 설정 파일(package.json, requirements.txt, schema.prisma 등)에서 읽음, 담당 역할(프론트/백엔드)에 맞는 기술만 표시
+- 출력: 요약 2쪽(기술 스택 그룹·버전, 경진대회, 자격증, AI 활용 기준, 기술별 색인) + 프로젝트별 1쪽 상세 (화면과 동일한 렌더링의 PDF)
 - 선택 다운로드: 프로젝트를 골라 내려받기, 프리셋(팀·개인·백엔드·프론트엔드), 전체 선택·해제, 1인 개발은 프론트·백엔드 양쪽 포함
 
 ## 기술 스택
@@ -38,6 +39,7 @@ GitHub 저장소 기반 카드형 A4 PDF 포트폴리오 생성 앱. 로컬 실�
 | 경로 | 내용 |
 |---|---|
 | `data/overrides.json` | 포함·제외 저장소, 수정값 (변경 시 `data/backups/` 자동 백업) |
+| `data/profile.json` | 자격증·경진대회·AI 활용 기준 (형식: `data/profile.example.json`) |
 | `data/config.json` | 본인 이름 목록 `names`, AI 키 위치 `ai.envFile` 또는 환경변수 `SCHOOL_GATEWAY_API_KEY` |
 | `.cache/` | 수집 결과, 내려받은 사진 |
 
@@ -51,6 +53,7 @@ GitHub 저장소 기반 카드형 A4 PDF 포트폴리오 생성 앱. 로컬 실�
 | `lib/collect.js`, `lib/github.js` | GitHub 수집 (변경분만, 재시도·시간 제한) |
 | `lib/judge.js` | 완성 판단, 팀 표·기간 추출 |
 | `lib/build.js` | 카드 목록 병합, 입력 검증, 백업 |
+| `lib/stack.js` | 설정 파일에서 기술·버전 추출 |
 | `lib/ai.js` | AI 제목 초안 (선택) |
 | `lib/pdf.js` | Chrome 제어 PDF 출력 |
 | `public/` | 화면·PDF 공용 렌더링, 다운로드 선택 창 |
