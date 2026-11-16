@@ -84,12 +84,13 @@ function renderPages(d, edit) {
   if (!d.projects.length) return '<p class="empty">아직 카드가 없습니다. "업데이트"를 눌러 GitHub에서 불러오세요.</p>';
   // 요약의 프로젝트 번호와 카드 번호를 같게 한다 (팀 먼저, 개인 다음)
   const ordered = ['team', 'solo'].flatMap(sec => d.projects.filter(p => p.section === sec));
+  const per = ordered.length <= 6 ? 1 : 2;                                   // 카드가 적으면 한 쪽에 하나씩 크게
   let no = 0, html = summaryPage({ ...d, projects: ordered });
   for (const sec of ['team', 'solo']) {
     const list = ordered.filter(p => p.section === sec);
-    for (let i = 0; i < list.length; i += 2) {
-      html += `<section class="page"><header><h2>${SECTIONS[sec]}</h2><span class="sub">최신순</span><span class="who">${esc(d.user.name || d.user.login)} · github.com/${esc(d.user.login)}</span></header>
-        <div class="cards">${list.slice(i, i + 2).map(p => card(p, ++no, edit)).join('')}</div></section>`;
+    for (let i = 0; i < list.length; i += per) {
+      html += `<section class="page${per === 1 ? ' one' : ''}"><header><h2>${SECTIONS[sec]}</h2><span class="sub">최신순</span><span class="who">${esc(d.user.name || d.user.login)} · github.com/${esc(d.user.login)}</span></header>
+        <div class="cards">${list.slice(i, i + per).map(p => card(p, ++no, edit)).join('')}</div></section>`;
     }
   }
   return html;

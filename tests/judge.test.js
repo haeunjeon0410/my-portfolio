@@ -53,8 +53,8 @@ test('기간 표기: 일 → 주 → 개월', () => {
   assert.equal(duration('2026-10-01', '2026-10-21'), '2026.10 (약 3주)');
   assert.equal(duration('2026-05-19', '2026-09-30'), '2026.05 (약 4개월)');
 });
-test('혼자 커밋했으면 1인 개발, 여럿이면 N명', () => {
-  assert.equal(autoFields(repo(), user).people, '1인 개발');
+test('혼자 커밋했으면 1인, 여럿이면 N명', () => {
+  assert.equal(autoFields(repo(), user).people, '1인');
   assert.equal(autoFields(repo({ contributors: [{ login: 'haeunjeon0410', n: 3 }, { login: 'friend', n: 2 }] }), user).people, '2명');
 });
 test('설명에 안내 문구가 섞이지 않는다', () => {

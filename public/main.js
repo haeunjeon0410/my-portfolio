@@ -106,7 +106,7 @@ function chooseDownload() {
     const feat = new Set(((DATA.profile || {}).featured) || []);
     PRESET_LIST = feat.size ? [['대표작', (p) => feat.has(p.key.toLowerCase())], ...PRESETS] : PRESETS;
     $('#dlPresets').innerHTML = PRESET_LIST.map(([name], i) => `<button type="button" class="chip" data-i="${i}">${name}</button>`).join('');
-    $('#dlList').innerHTML = list.map((p, i) => `<li><label title="${p.section === 'team' ? '팀' : '개인'}${isSolo(p) ? ' · 1인 개발' : (p.role ? ' · ' + esc(p.role) : '')}"><input type="checkbox" data-i="${i}" checked><b>${esc(p.name)}</b></label></li>`).join('');
+    $('#dlList').innerHTML = list.map((p, i) => `<li><label title="${p.section === 'team' ? '팀' : '개인'}${isSolo(p) ? ' · 1인' : (p.role ? ' · ' + esc(p.role) : '')}"><input type="checkbox" data-i="${i}" checked><b>${esc(p.name)}</b></label></li>`).join('');
     dlg.addEventListener('close', () => {
       done(dlg.returnValue === 'ok' ? [...dlg.querySelectorAll('#dlList input')].filter(c => c.checked).map(c => list[c.dataset.i].key) : null);
     }, { once: true });
