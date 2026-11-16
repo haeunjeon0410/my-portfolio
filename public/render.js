@@ -56,8 +56,10 @@ function cardWide(p, no, edit) {
   const solo = /^1인/.test(p.people);
   const list = (title, v) => { const l = lines(v); return l.length ? `<div class="blk"><h4>${title}</h4><ul>${l.map(x => `<li>${emph(x)}</li>`).join('')}</ul></div>` : ''; };
   const blocks = list('역할', p.roleDetail) + list('핵심 성과', p.achievements) + list('지표', p.metrics) + list('AI 활용', p.ai);
-  return `<article class="card l2" data-key="${esc(p.key)}"><div class="lcol"><div class="shots">${imgs}</div><div class="facts"><dl>${row(p, 'name', '프로젝트명', 1)}${row(p, 'period', '기간', 1)}${row(p, 'people', '인원', 1)}${solo ? '' : row(p, 'role', '개발 담당', 1)}${row(p, 'result', '프로젝트 성과')}${row(p, 'note', '비고')}${envCell(p)}</dl></div></div>
-    <div class="info"><h3><span class="no">${no}.</span><span>${esc(p.title)}</span></h3>${blocks ? `<div class="blocks">${blocks}</div>` : '<p class="nodetail">역할·핵심 성과를 연필(수정)에서 적으면 이 칸에 표시됩니다.</p>'}</div>
+  const res = lines(p.result), note = lines(p.note);                          // 성과·비고는 아래쪽 강조 띠로 (눈에 먼저 들어오게)
+  const hl = (res.length || note.length) ? `<div class="hl">${res.length ? `<div class="hl-main"><b>성과</b>${res.map((x, i) => i ? `<small>${esc(x)}</small>` : `<span>${esc(x)}</span>`).join('')}</div>` : ''}${note.length ? `<div class="hl-note"><b>비고</b><span>${note.map(esc).join(' · ')}</span></div>` : ''}</div>` : '';
+  return `<article class="card l2" data-key="${esc(p.key)}"><div class="lcol"><div class="shots">${imgs}</div><div class="facts"><dl>${row(p, 'name', '프로젝트명', 1)}${row(p, 'period', '기간', 1)}${row(p, 'people', '인원', 1)}${solo ? '' : row(p, 'role', '개발 담당', 1)}${envCell(p)}</dl></div></div>
+    <div class="info"><h3><span class="no">${no}.</span><span>${esc(p.title)}</span></h3>${blocks ? `<div class="blocks">${blocks}</div>` : '<p class="nodetail">역할·핵심 성과를 연필(수정)에서 적으면 이 칸에 표시됩니다.</p>'}${hl}</div>
   ${edit ? `<button class="pencil" data-edit="${esc(p.key)}" aria-label="수정" title="수정">${PENCIL}</button>` : ''}</article>`;
 }
 
@@ -92,15 +94,15 @@ function summaryPage(d) {
     const main = l.filter(a => MAIN.has(a.name) || a.cat === 'Language'), rest = l.filter(a => !(MAIN.has(a.name) || a.cat === 'Language'));
     return `<div class="srow"><b>${label}</b><div><div class="main">${main.map(item).join('')}</div>${rest.length ? `<div class="rest">${rest.map(item).join(' · ')}</div>` : ''}</div></div>`;
   }).join('');
-  const block = (title, body) => body ? `<section class="sblock"><h4>${title}</h4>${body}</section>` : '';
+  const block = (title, body, cls = '') => body ? `<section class="sblock ${cls}"><h4>${title}</h4>${body}</section>` : '';
   const steps = (ai.steps || []).length ? `<ol class="steps">${ai.steps.map(([k, v]) => `<li><b>${esc(k)}</b><span>${esc(v)}</span></li>`).join('')}</ol>` : '';
   const aiBody = (ai.statement ? `<p>${esc(ai.statement)}</p>` : '') + steps + (ai.evidence ? `<p class="ev">${esc(ai.evidence)}</p>` : '') + (ai.note ? `<p class="ev">${esc(ai.note)}</p>` : '');
   return `<section class="page summary"><header><h2>요약</h2><span class="sub">프로젝트 ${d.projects.length}개</span><span class="who">${esc(d.user.name || d.user.login)} · github.com/${esc(d.user.login)}</span></header>
     ${pf.tagline ? `<p class="tag">${esc(pf.tagline)}</p>` : ''}
-    <div class="sgrid"><div class="scol">${block('기술 스택 <small>설정 파일에 선언된 버전 · 회색 이름은 버전 미고정</small>', rows)}</div>
+    <div class="sgrid"><div class="scol">${block('기술 스택 <small>설정 파일에 선언된 버전 · 회색 이름은 버전 미고정</small>', rows, 'stk')}</div>
     <div class="scol">${block('경진대회·수상', awards.length ? `<ul>${awards.map(a => `<li>${esc(a.text)}${a.project ? ` <small>${esc(a.project)}</small>` : ''}</li>`).join('')}</ul>` : '')}
     ${block('자격증', certs.length ? `<ul>${certs.map(c => `<li>${esc(typeof c === 'string' ? c : [c.name, c.date].filter(Boolean).join(' · '))}</li>`).join('')}</ul>` : '')}
-    ${block('AI 활용 방식', aiBody)}</div></div></section>`;
+    ${block('AI 활용 방식', aiBody, 'aib')}</div></div></section>`;
 }
 
 function renderPages(d, edit) {

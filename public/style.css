@@ -220,3 +220,42 @@ body.print .tools { display: none !important; }
 .summary .steps b { color: #2f5597; }
 .summary .sblock p.ev { margin-top: 2mm; font-size: 8.8pt; color: #7b8494; line-height: 1.55; }
 .blk li b { font-weight: 700; }
+
+/* ================= 페이지 높이를 채우는 배치 (위로 쏠리지 않게) ================= */
+/* 카드(한 쪽 한 개): 왼쪽은 스크린샷이 남는 높이를 채우고, 오른쪽은 제목 / 내용(가운데) / 성과 띠(아래) */
+.card.l2 .shots { flex: 1; height: auto; min-height: 60mm; }
+.card.l2 .facts { flex: none; }
+.card.l2 .info { display: flex; flex-direction: column; padding: 8mm 9mm; }
+.card.l2 .info h3 { font-size: 16pt; margin-bottom: 0; }
+.card.l2 .info .blocks { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 6.5mm; padding: 4mm 0; }
+.card.l2 .blk { margin: 0; }
+.card.l2 .blk h4 { font-size: 10pt; margin-bottom: 2mm; letter-spacing: 0.02em; }
+.card.l2 .blk ul { font-size: 12.4pt; line-height: 1.6; padding-left: 5mm; }
+.card.l2 .blk li { margin-bottom: 1.4mm; }
+.card.l2 .hl { flex: none; margin-top: 2mm; padding: 4.2mm 5mm; background: #f3f6fb; border-left: 1.3mm solid #2f5597; display: grid; gap: 2.4mm; }
+.card.l2 .hl b { display: block; font-size: 9pt; color: #2f5597; margin-bottom: 0.6mm; letter-spacing: 0.04em; }
+.card.l2 .hl-main span { display: block; font-size: 14pt; font-weight: 700; line-height: 1.4; color: #111; }
+.card.l2 .hl-main small { display: block; font-size: 10.5pt; color: #555; margin-top: 0.6mm; }
+.card.l2 .hl-note span { font-size: 11.5pt; color: #333; }
+/* 요약: 기술 줄들과 AI 단계가 남는 높이를 나눠 갖는다 */
+.summary .sgrid { align-items: stretch; }
+.summary .scol { height: 100%; }
+.summary .sblock.stk { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.summary .sblock.stk .srow { flex: 1; align-items: center; padding: 1.5mm 0; }
+.summary .sblock.stk .srow .main { font-size: 13pt; gap: 1mm 7mm; }
+.summary .sblock.stk .srow .rest { font-size: 9.2pt; }
+.summary .sblock.stk .srow > b { font-size: 10pt; padding-top: 0; }
+.summary .sblock.aib { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.summary .sblock.aib .steps { flex: 1; display: flex; flex-direction: column; }
+.summary .sblock.aib .steps li { flex: 1; align-items: center; font-size: 11.5pt; }
+.summary .sblock.aib .steps b { font-size: 11pt; }
+.summary .sblock.aib p { font-size: 10.8pt; }
+
+/* 요약 오른쪽: 수상 목록을 키워 균형 맞춤 */
+.summary .scol:last-child > .sblock:first-child ul { font-size: 12.4pt; line-height: 1.75; padding-left: 5mm; }
+.summary .scol:last-child > .sblock:first-child li small { font-size: 9.6pt; }
+.summary .scol:last-child > .sblock:first-child { margin-bottom: 2mm; }
+.summary .sblock h4 { font-size: 12pt; }
+
+/* 한글이 글자 중간에서 줄바꿈되지 않게 (단어 단위) */
+.card.l2 .info, .card.l2 .facts, .summary { word-break: keep-all; overflow-wrap: break-word; }
