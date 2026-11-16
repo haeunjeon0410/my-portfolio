@@ -29,3 +29,12 @@ test('읽기에 실패하거나 깨진 파일이 있어도 멈추지 않는다',
   const r = await run(['package.json', 'requirements.txt'], { 'package.json': '{깨진' });
   assert.deepEqual(r.stack, []);
 });
+
+test('ioredis 는 라이브러리(버전 있음)이고 Redis 는 서비스(버전 없음)로 따로 읽는다', async () => {
+  const r = await run(['package.json'], { 'package.json': JSON.stringify({ dependencies: { ioredis: '^5.10.1' } }) });
+  const s = byName(r); assert.equal(s.ioredis.ver, '5.10.1'); assert.equal(s.Redis.ver, '');
+});
+test('Dockerfile 이미지 태그에서 런타임 버전과 Docker 이미지를 읽는다', async () => {
+  const r = await run(['Dockerfile'], { Dockerfile: 'FROM node:20-alpine\nRUN echo' });
+  const s = byName(r); assert.equal(s['Node.js'].ver, '20'); assert.equal(s.Docker.ver, 'node:20-alpine');
+});

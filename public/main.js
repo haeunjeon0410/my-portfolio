@@ -6,8 +6,8 @@ const get = async (url) => parse(await fetch(url));
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 let DATA = null, BUSY = false, AI = false;
 
-const FIELDS = [['title', '설명 (제목)'], ['name', '프로젝트명'], ['period', '기간'], ['people', '인원'], ['env', '언어 및 환경'], ['role', '개발 담당'], ['roleDetail', '역할 (줄마다 한 항목)'], ['achievements', '핵심 성과 (줄마다 한 항목)'], ['metrics', '지표 (예: LCP, DAU)'], ['result', '프로젝트 성과'], ['ai', 'AI 활용'], ['note', '비고']];
-const LINEF = new Set(['result', 'roleDetail', 'achievements', 'metrics']);       // 여러 줄로 적는 칸
+const FIELDS = [['title', '설명 (제목)'], ['name', '프로젝트명'], ['period', '기간'], ['people', '인원'], ['env', '언어 및 환경'], ['role', '개발 담당'], ['roleDetail', '역할 (줄마다 한 항목)'], ['achievements', '핵심 성과 (줄마다 한 항목)'], ['metrics', '지표 (예: LCP, DAU)'], ['result', '프로젝트 성과'], ['ai', 'AI 활용 (기획→개발→검증, 줄마다 한 항목)'], ['note', '비고']];
+const LINEF = new Set(['result', 'roleDetail', 'achievements', 'metrics', 'ai']);       // 여러 줄로 적는 칸
 
 function setBusy(b, text) { BUSY = b; $('#make').disabled = b; $('#download').disabled = b; if (text !== undefined) $('#status').textContent = text; }
 async function load() {

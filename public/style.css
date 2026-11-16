@@ -192,3 +192,14 @@ body.print .tools { display: none !important; }
 .summary .sblock li small { font-size: 9pt; }
 
 .page.one .cards { grid-template-rows: 1fr; }
+
+.chip em, .sl em { font-style: normal; color: #b4bac6; font-size: 0.85em; }
+
+/* 요약 쪽이 넘치지 않도록 칩과 간격을 조금 줄임 */
+.summary .srow { padding: 1.4mm 0; grid-template-columns: 24mm 1fr; }
+.summary .srow > b { font-size: 9pt; padding-top: 0.8mm; }
+.summary .chip { font-size: 9pt; padding: 0.4mm 2mm; margin: 0.5mm 1.2mm 0.5mm 0; line-height: 1.45; }
+.summary .chip u { font-size: 7.4pt; }
+.summary .scol { gap: 4mm; }
+.summary .sblock h4 { font-size: 11pt; margin-bottom: 1.6mm; }
+.summary .sblock ul, .summary .sblock p { font-size: 10.2pt; line-height: 1.55; }
