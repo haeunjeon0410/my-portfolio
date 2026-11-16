@@ -91,18 +91,21 @@ const PRESETS = [                                                   // 누르면
   ['백엔드', (p) => isSolo(p) || /백엔드/.test(p.role)],
   ['프론트엔드', (p) => isSolo(p) || /프론트/.test(p.role)],
 ];
+let PRESET_LIST = PRESETS;
 function dlCount() {
   const n = document.querySelectorAll('#dlList input:checked').length;
   $('#dlOk').textContent = n ? `PDF 만들기 (${n})` : 'PDF 만들기'; $('#dlOk').disabled = n === 0;
   document.querySelectorAll('#dlPresets button').forEach((b) => {            // 지금 체크 상태와 정확히 같은 묶음을 표시
-    const f = PRESETS[b.dataset.i][1], same = DATA.projects.every((p, i) => document.querySelector(`#dlList input[data-i="${i}"]`).checked === !!f(p));
+    const f = PRESET_LIST[b.dataset.i][1], same = DATA.projects.every((p, i) => document.querySelector(`#dlList input[data-i="${i}"]`).checked === !!f(p));
     b.classList.toggle('on', same);
   });
 }
 function chooseDownload() {
   return new Promise((done) => {
     const dlg = $('#dl'), list = DATA.projects;
-    $('#dlPresets').innerHTML = PRESETS.map(([name], i) => `<button type="button" class="chip" data-i="${i}">${name}</button>`).join('');
+    const feat = new Set(((DATA.profile || {}).featured) || []);
+    PRESET_LIST = feat.size ? [['대표작', (p) => feat.has(p.key.toLowerCase())], ...PRESETS] : PRESETS;
+    $('#dlPresets').innerHTML = PRESET_LIST.map(([name], i) => `<button type="button" class="chip" data-i="${i}">${name}</button>`).join('');
     $('#dlList').innerHTML = list.map((p, i) => `<li><label title="${p.section === 'team' ? '팀' : '개인'}${isSolo(p) ? ' · 1인 개발' : (p.role ? ' · ' + esc(p.role) : '')}"><input type="checkbox" data-i="${i}" checked><b>${esc(p.name)}</b></label></li>`).join('');
     dlg.addEventListener('close', () => {
       done(dlg.returnValue === 'ok' ? [...dlg.querySelectorAll('#dlList input')].filter(c => c.checked).map(c => list[c.dataset.i].key) : null);
@@ -112,7 +115,7 @@ function chooseDownload() {
 }
 document.addEventListener('click', (e) => {
   const b = e.target.closest('#dlPresets button'); if (!b) return;
-  const f = PRESETS[b.dataset.i][1];
+  const f = PRESET_LIST[b.dataset.i][1];
   DATA.projects.forEach((p, i) => { document.querySelector(`#dlList input[data-i="${i}"]`).checked = !!f(p); });
   dlCount();
 });
